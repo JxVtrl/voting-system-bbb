@@ -128,7 +128,7 @@ export function AdminMenu({ participants, isVotingEnabled }: AdminMenuProps) {
           <button
             className={`${styles.adminMenuButton} ${styles.adminMenuButtonSecondary}`}
             onClick={() => {
-              router.push('/admin/historico');
+              router.push('/admin/votacoes');
               toast.dismiss('admin-menu');
             }}
           >

@@ -13,10 +13,11 @@ export default function Votacoes() {
   useEffect(() => {
     const loadVotingHistory = async () => {
       try {
-        const history = await api.getVotingHistory();
-        setVotingHistory(history);
+        const response = await api.getVotingHistory();
+        setVotingHistory(response || []);
       } catch (err) {
         console.error('Erro ao carregar histórico:', err);
+        setVotingHistory([]);
       } finally {
         setIsLoading(false);
       }
