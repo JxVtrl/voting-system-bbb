@@ -41,12 +41,6 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
           >
             Votações
           </Link>
-          <Link
-            href="/admin/configuracoes"
-            className={`${styles.adminNavLink} ${isActive('/admin/configuracoes') ? styles.adminNavLinkActive : ''}`}
-          >
-            Configurações
-          </Link>
         </div>
       </nav>
 
