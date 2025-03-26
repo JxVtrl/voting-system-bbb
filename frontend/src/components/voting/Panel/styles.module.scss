@@ -17,11 +17,22 @@
 
     &Grid {
         display: grid;
-        grid-template-columns: repeat(auto-fit, 200px);
-        gap: 1.5rem;
-        margin-bottom: 3rem;
+        width: 100%;
+        max-width: 1200px;
+        margin: 0 auto 3rem;
         padding: 0 1rem;
+        gap: 2rem;
         justify-content: center;
+        grid-template-columns: repeat(auto-fit, minmax(160px, 200px));
+
+        @media (min-width: 640px) {
+            grid-template-columns: repeat(auto-fit, minmax(180px, 220px));
+        }
+
+        @media (min-width: 1024px) {
+            grid-template-columns: repeat(auto-fit, minmax(200px, 240px));
+            max-width: min(100%, calc(240px * 5 + 2rem * 4)); // 5 cards + 4 gaps
+        }
     }
 
     &Card {
@@ -30,6 +41,7 @@
         cursor: pointer;
         transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         background: transparent;
+        width: 100%;
         
         &:hover:not(&Disabled) {
             transform: translateY(-4px);
@@ -187,15 +199,6 @@
     }
 }
 
-@media (max-width: 1200px) {
-    .votingPanel {
-        &Grid {
-            grid-template-columns: repeat(auto-fit, 180px);
-            gap: 1.25rem;
-        }
-    }
-}
-
 @media (max-width: 768px) {
     .votingPanel {
         padding: 1.5rem 0.5rem;
@@ -206,9 +209,9 @@
         }
 
         &Grid {
-            grid-template-columns: repeat(auto-fit, 150px);
-            gap: 1rem;
+            gap: 1.25rem;
             padding: 0 0.5rem;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 180px));
         }
 
         &Name {
