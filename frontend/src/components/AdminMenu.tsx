@@ -247,7 +247,6 @@ export function AdminMenu({ participants, isVotingEnabled }: AdminMenuProps) {
 
       {showParedaoModal && (
         <ParedaoModal
-          participants={participants}
           onClose={() => setShowParedaoModal(false)}
           onConfirm={handleStartVoting}
         />

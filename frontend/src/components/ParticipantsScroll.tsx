@@ -1,80 +1,65 @@
 import styled from 'styled-components';
 import { Participant } from '../types';
 import { ParticipantCircle } from './ParticipantCircle';
+import { useState, useEffect } from 'react';
+import { api } from '../services/api';
 
-interface ParticipantsScrollProps {
-  participants: Participant[];
-}
-
-const Container = styled.div`
-  position: relative;
+const ScrollContainer = styled.div`
   width: 100%;
-  padding: 30px 0 5px;
-  margin: 0;
-`;
-
-const FlexContainer = styled.div`
+  overflow-x: auto;
+  padding: 1rem 0;
   display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 5px;
-  padding: 0 10px;
-  max-width: 100%;
-  margin: 0 auto;
-  flex-wrap: nowrap;
-`;
-
-const ParticipantWrapper = styled.div<{ isEliminated?: boolean }>`
-  position: relative;
-  width: 40px;
-  height: 40px;
-  transition: transform 0.2s ease;
-  filter: ${props => props.isEliminated ? 'grayscale(100%)' : 'none'};
-  opacity: ${props => props.isEliminated ? '0.8' : '1'};
-
-  &:hover {
-    z-index: 1;
-    transform: ${props => props.isEliminated ? 'none' : 'scale(1.1)'};
-  }
-
-  /* Efeito de hover com sombra */
-  &:hover > * {
-    box-shadow: ${props => props.isEliminated ? 'none' : '0 8px 16px rgba(0,0,0,0.1)'};
+  gap: 1rem;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  &::-webkit-scrollbar {
+    display: none;
   }
 `;
 
-const Title = styled.h2`
-  text-align: center;
-  color: #333;
-  font-size: 20px;
-  margin-bottom: 10px;
-  font-weight: 600;
-  
-  /* Efeito de gradiente no texto */
-  background: linear-gradient(45deg, #FF0000, #FF6B6B);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+const ParticipantsContainer = styled.div`
+  display: flex;
+  gap: 1rem;
+  padding: 0 1rem;
 `;
 
-const ParticipantsScroll = ({ participants }: ParticipantsScrollProps) => {
+export function ParticipantsScroll() {
+  const [participants, setParticipants] = useState<Participant[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const loadParticipants = async () => {
+      try {
+        const response = await api.getParticipants();
+        // Converte o objeto de participantes em array
+        const participantsArray = Object.values(response) as Participant[];
+        setParticipants(participantsArray);
+      } catch (error) {
+        console.error('Erro ao carregar participantes:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadParticipants();
+  }, []);
+
+  if (loading) {
+    return <div>Carregando participantes...</div>;
+  }
+
   return (
     <>
-      <Title>Participantes BBB 25</Title>
-      <Container>
-        <FlexContainer>
+      <ScrollContainer>
+        <ParticipantsContainer>
           {participants.map((participant) => (
-            <ParticipantWrapper 
+            <ParticipantCircle
               key={participant.id}
-              isEliminated={participant.status === 'eliminado'}
-            >
-              <ParticipantCircle participant={participant} />
-            </ParticipantWrapper>
+              participant={participant}
+            />
           ))}
-        </FlexContainer>
-      </Container>
+        </ParticipantsContainer>
+      </ScrollContainer>
     </>
   );
-};
-
-export { ParticipantsScroll }; 
+} 

@@ -20,6 +20,8 @@ const CircleContainer = styled.div<{ $isActive?: boolean }>`
   transition: all 0.3s ease;
   cursor: pointer;
 
+  filter: ${props => props.$isActive ? 'none' : 'grayscale(100%)'};
+
   &:hover {
     transform: scale(1.1);
   }

@@ -1,6 +1,7 @@
 import styled from 'styled-components';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Participant } from '../types';
+import { api } from '../services/api';
 
 const ModalOverlay = styled.div`
   position: fixed;
@@ -109,13 +110,33 @@ const Button = styled.button<{ $variant?: 'secondary' }>`
 `;
 
 interface ParedaoModalProps {
-  participants: Participant[];
   onClose: () => void;
   onConfirm: (selectedIds: string[]) => void;
 }
 
-export function ParedaoModal({ participants, onClose, onConfirm }: ParedaoModalProps) {
+export function ParedaoModal({ onClose, onConfirm }: ParedaoModalProps) {
+  const [participants, setParticipants] = useState<Participant[]>([]);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const loadParticipants = async () => {
+      try {
+        const response = await api.getParticipants();
+        // Converte o objeto de participantes em um array e filtra apenas os ativos
+        const participantsArray = Object.values(response)
+          .map(p => p as Participant)
+          .filter(participant => participant.isActive && participant.status !== 'eliminado');
+        setParticipants(participantsArray);
+      } catch (error) {
+        console.error('Erro ao carregar participantes:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadParticipants();
+  }, []);
 
   const handleParticipantClick = (participant: Participant) => {
     if (participant.status === 'líder') return;
@@ -133,6 +154,16 @@ export function ParedaoModal({ participants, onClose, onConfirm }: ParedaoModalP
       onConfirm(selectedIds);
     }
   };
+
+  if (loading) {
+    return (
+      <ModalOverlay onClick={onClose}>
+        <ModalContent onClick={e => e.stopPropagation()}>
+          <Title>Carregando participantes...</Title>
+        </ModalContent>
+      </ModalOverlay>
+    );
+  }
 
   return (
     <ModalOverlay onClick={onClose}>

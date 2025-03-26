@@ -1,12 +1,5 @@
 import { useState, useEffect } from 'react';
-
-interface Participant {
-  id: string;
-  name: string;
-  imageUrl: string;
-  status?: string;
-  isActive: boolean;
-}
+import { Participant } from '@/types';
 
 interface ParticipantModalProps {
   participant: Participant | null;
@@ -24,8 +17,9 @@ export default function ParticipantModal({
   const [formData, setFormData] = useState<Omit<Participant, 'id'>>({
     name: '',
     imageUrl: '',
-    status: '',
+    status: 'normal',
     isActive: true,
+    votes: 0
   });
 
   useEffect(() => {
@@ -33,8 +27,9 @@ export default function ParticipantModal({
       setFormData({
         name: participant.name,
         imageUrl: participant.imageUrl,
-        status: participant.status || '',
-        isActive: participant.isActive,
+        status: participant.status || 'normal',
+        isActive: participant.isActive ?? true,
+        votes: participant.votes ?? 0
       });
     }
   }, [participant]);
@@ -113,12 +108,11 @@ export default function ParticipantModal({
             </label>
             <select
               value={formData.status}
-              onChange={(e) => setFormData({ ...formData, status: e.target.value })}
+              onChange={(e) => setFormData({ ...formData, status: e.target.value as 'eliminado' | 'líder' | 'normal' })}
               className="w-full px-3 py-2 border rounded-md"
             >
-              <option value="">Sem status</option>
+              <option value="normal">Normal</option>
               <option value="líder">Líder</option>
-              <option value="indicado">Indicado</option>
               <option value="eliminado">Eliminado</option>
             </select>
           </div>

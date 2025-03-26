@@ -1,12 +1,6 @@
 import { useState } from 'react';
 import Image from 'next/image';
-
-interface Participant {
-  id: string;
-  name: string;
-  imageUrl: string;
-  isActive: boolean;
-}
+import { Participant } from '@/types';
 
 interface ParticipantSelectionModalProps {
   isOpen: boolean;
@@ -46,7 +40,7 @@ export default function ParticipantSelectionModal({
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg p-6 max-w-2xl w-full mx-4">
+      <div className="bg-white rounded-lg p-6 max-w-4xl w-full">
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-2xl font-bold text-gray-900">Selecionar Participantes para o Paredão</h2>
           <button
@@ -63,7 +57,7 @@ export default function ParticipantSelectionModal({
           Selecione exatamente 3 participantes para o paredão. Apenas participantes ativos estão disponíveis.
         </p>
 
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mb-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mb-6">
           {participants
             .filter(p => p.isActive)
             .map((participant) => (
@@ -94,7 +88,7 @@ export default function ParticipantSelectionModal({
             ))}
         </div>
 
-        <div className="flex justify-between items-center">
+        <div className="flex items-center justify-between">
           <p className="text-sm text-gray-600">
             {selectedParticipants.length}/3 participantes selecionados
           </p>

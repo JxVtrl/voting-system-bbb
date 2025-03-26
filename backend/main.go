@@ -5,18 +5,25 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"strconv"
 	"strings"
 	"time"
-	"github.com/google/uuid"
 )
 
 type Participant struct {
-	ID       string `json:"id"`
+	ID       int    `json:"id"`
 	Name     string `json:"name"`
 	ImageURL string `json:"imageUrl"`
-	Status   string `json:"status,omitempty"`
+	Status   string `json:"status"`
 	IsActive bool   `json:"isActive"`
-	Votes    int    `json:"votes,omitempty"`
+	Votes    int    `json:"votes"`
+}
+
+type Voting struct {
+	ID           string       `json:"id"`
+	Participants []Participant `json:"participants"`
+	StartTime    time.Time    `json:"startTime"`
+	Votes        map[int]int  `json:"votes"`
 }
 
 type VotingStatus struct {
@@ -25,51 +32,57 @@ type VotingStatus struct {
 	EndTime       string       `json:"endTime,omitempty"`
 	TotalVotes    int          `json:"totalVotes"`
 	Participants  []Participant `json:"participants"`
+	Votes         map[int]int  `json:"votes"`
 }
 
 type VotingHistory struct {
 	ID           string       `json:"id"`
-	StartTime    string       `json:"startTime"`
-	EndTime      string       `json:"endTime"`
-	TotalVotes   int          `json:"totalVotes"`
 	Participants []Participant `json:"participants"`
-	Winner       *Participant `json:"winner,omitempty"`
+	Winner       *Participant `json:"winner"`
+	TotalVotes   int          `json:"totalVotes"`
+	EndTime      time.Time    `json:"endTime"`
 }
 
-var (
-	participants = []Participant{
-		{ID: "aline", Name: "Aline", ImageURL: "https://s2.glbimg.com/BP82Ew-JnAgxPxFnvIhvdqaLsPs=/i.s3.glbimg.com/v1/AUTH_e84042ef78cb4708aeebdf1c68c6cbd6/internal_photos/bs/2025/6/K/3rOk79SQiWAqL0AnZxJw/aline-bbb-25.png", Status: "eliminado", IsActive: false},
-		{ID: "vinicius", Name: "Vinícius", ImageURL: "https://s2.glbimg.com/HY3hReI2ddPdQbzfutbdIIoe8eQ=/i.s3.glbimg.com/v1/AUTH_e84042ef78cb4708aeebdf1c68c6cbd6/internal_photos/bs/2025/P/7/OTwcPASPGP4gbmy3QsuA/vinicius-bbb-25.png", IsActive: true},
-		{ID: "arleane", Name: "Arleane", ImageURL: "https://s2.glbimg.com/cig7f5qU-1V2WE14Rj-MHsqxwMo=/i.s3.glbimg.com/v1/AUTH_e84042ef78cb4708aeebdf1c68c6cbd6/internal_photos/bs/2025/A/u/ncRjVERJAv9VjvMpiQyA/arleane-bbb-25.png", Status: "eliminado", IsActive: false},
-		{ID: "marcelo", Name: "Marcelo", ImageURL: "https://s2.glbimg.com/3reaY-P_hhUQkJnj3hzaj4H2V_g=/i.s3.glbimg.com/v1/AUTH_e84042ef78cb4708aeebdf1c68c6cbd6/internal_photos/bs/2025/0/T/sBh6wlRx6CBU2QX7m6lA/marcelo-bbb-25.png", Status: "eliminado", IsActive: false},
-		{ID: "camilla", Name: "Camilla", ImageURL: "https://s2.glbimg.com/2x_1MSjYLO1zaHfHjXnM3RlRdtM=/i.s3.glbimg.com/v1/AUTH_e84042ef78cb4708aeebdf1c68c6cbd6/internal_photos/bs/2025/w/R/5qAqGiTEArB0yMUptk5A/camila-bbb-25.png", Status: "eliminado", IsActive: false},
-		{ID: "thamiris", Name: "Thamiris", ImageURL: "https://s2.glbimg.com/PY0BHk7p8bhg2VIimyKS24d1P04=/i.s3.glbimg.com/v1/AUTH_e84042ef78cb4708aeebdf1c68c6cbd6/internal_photos/bs/2025/i/S/At5qCZSz6EqHtvBTJHLw/thamiris-bbb-25.png", Status: "eliminado", IsActive: false},
-		{ID: "daniele", Name: "Daniele Hypolito", ImageURL: "https://s2.glbimg.com/tMhq3B0Tz4cukRi0AMKyr5eeoGw=/i.s3.glbimg.com/v1/AUTH_e84042ef78cb4708aeebdf1c68c6cbd6/internal_photos/bs/2025/h/2/22pebxTkGxchRBUlK8MQ/daniele-bbb-25.png", IsActive: true},
-		{ID: "diego", Name: "Diego Hypolito", ImageURL: "https://s2.glbimg.com/zMwedNYl83ucrGEep3QspGvC2NM=/i.s3.glbimg.com/v1/AUTH_e84042ef78cb4708aeebdf1c68c6cbd6/internal_photos/bs/2025/L/M/TWeMYUTx2BTlJM5qRKtQ/diego-bbb-25.png", IsActive: true},
-		{ID: "diogo", Name: "Diogo Almeida", ImageURL: "https://s2.glbimg.com/G96s9uUh5NelnbCSCfXLXE6qoeQ=/i.s3.glbimg.com/v1/AUTH_e84042ef78cb4708aeebdf1c68c6cbd6/internal_photos/bs/2025/b/y/RwiHQzSkWIbm5YIHga0w/diogo-bbb-25.png", Status: "eliminado", IsActive: false},
-		{ID: "vilma", Name: "Vilma", ImageURL: "https://s2.glbimg.com/b5Q-1gz6YZZR2osc7Z6IHIgg0Qo=/i.s3.glbimg.com/v1/AUTH_e84042ef78cb4708aeebdf1c68c6cbd6/internal_photos/bs/2025/Q/B/prKIZiQAGkJPRtHrRirw/vilma-bbb-25.png", IsActive: true},
-		{ID: "edilberto", Name: "Edilberto", ImageURL: "https://s2.glbimg.com/T2-nzU8RGQYWt1jWUGofUYwWkoE=/i.s3.glbimg.com/v1/AUTH_e84042ef78cb4708aeebdf1c68c6cbd6/internal_photos/bs/2025/l/5/P8dJ0BSPmTeCeeb0Caiw/edilberto-bbb-25.png", Status: "eliminado", IsActive: false},
-		{ID: "raissa", Name: "Raissa", ImageURL: "https://s2.glbimg.com/07z_KxTItCLUX9a9QerzK4RJYXE=/i.s3.glbimg.com/v1/AUTH_e84042ef78cb4708aeebdf1c68c6cbd6/internal_photos/bs/2025/D/t/raObCaTgA5niMPugBMKg/raissa-bbb-25.png", Status: "eliminado", IsActive: false},
-		{ID: "eva", Name: "Eva", ImageURL: "https://s2.glbimg.com/iWVO7h3QlGiV8BwD0RYDx7cEwxU=/i.s3.glbimg.com/v1/AUTH_e84042ef78cb4708aeebdf1c68c6cbd6/internal_photos/bs/2025/L/B/wM4kF4Tpy0SpX2sA4rwQ/eva-bbb-25.png", IsActive: true},
-		{ID: "renata", Name: "Renata", ImageURL: "https://s2.glbimg.com/NWPDpEC0-wPrndUxzfLjoCqRUcw=/i.s3.glbimg.com/v1/AUTH_e84042ef78cb4708aeebdf1c68c6cbd6/internal_photos/bs/2025/t/r/zVRCCJQCivrP42Wnlstg/renata-bbb-25.png", Status: "líder", IsActive: true},
-		{ID: "gabriel", Name: "Gabriel", ImageURL: "https://s2.glbimg.com/0xNq2yiP56tVmQTrsJugX9F16Ds=/i.s3.glbimg.com/v1/AUTH_e84042ef78cb4708aeebdf1c68c6cbd6/internal_photos/bs/2025/G/u/PtDQNWQvat18KX5MrbxQ/gabriel-bbb-25.png", Status: "eliminado", IsActive: false},
-		{ID: "maike", Name: "Maike", ImageURL: "https://s2.glbimg.com/kT69XDgS68cKcD2oQx11OBpwZFg=/i.s3.glbimg.com/v1/AUTH_e84042ef78cb4708aeebdf1c68c6cbd6/internal_photos/bs/2025/3/e/DcDKDsT1KFSELrDBP8CQ/maike-bbb-25.png", IsActive: true},
-		{ID: "gracyanne", Name: "Gracyanne Barbosa", ImageURL: "https://s2.glbimg.com/-dBPW_G7xXmtTVTY4He-CsGqiR4=/i.s3.glbimg.com/v1/AUTH_e84042ef78cb4708aeebdf1c68c6cbd6/internal_photos/bs/2025/O/b/2aAkGqQVye0oLJBQNpjw/gracyanne-bbb-25.png", Status: "eliminado", IsActive: false},
-		{ID: "giovanna", Name: "Giovanna", ImageURL: "https://s2.glbimg.com/cCqbmUTyM5JkF81LA0FDA7UOc7U=/i.s3.glbimg.com/v1/AUTH_e84042ef78cb4708aeebdf1c68c6cbd6/internal_photos/bs/2025/W/8/lDhnWkT1G14vIqdGDA1Q/giovanna-bbb-25.png", Status: "eliminado", IsActive: false},
-		{ID: "guilherme", Name: "Guilherme", ImageURL: "https://s2.glbimg.com/DmsApwFL9BbGa8mJVI38sFGOMVY=/i.s3.glbimg.com/v1/AUTH_e84042ef78cb4708aeebdf1c68c6cbd6/internal_photos/bs/2025/z/F/MAL0oiQWy522aXB9Q0tw/guilherme-bbb-25.png", IsActive: true},
-		{ID: "joselma", Name: "Joselma", ImageURL: "https://s2.glbimg.com/kOXnDmx4ZRe9BKv-PI_tYdZutGM=/i.s3.glbimg.com/v1/AUTH_e84042ef78cb4708aeebdf1c68c6cbd6/internal_photos/bs/2025/a/l/UwBn2JQj2glsBZN4TyiA/joselma-bbb-25.png", IsActive: true},
-		{ID: "joao-gabriel", Name: "João Gabriel", ImageURL: "https://s2.glbimg.com/L6FYUD9bMsw-P--MJZbDuhjudQQ=/i.s3.glbimg.com/v1/AUTH_e84042ef78cb4708aeebdf1c68c6cbd6/internal_photos/bs/2025/1/7/LlAxWeTiOwAmMwPnJAZw/joaogabriel-bbb-25.png", IsActive: true},
-		{ID: "joao-pedro", Name: "João Pedro", ImageURL: "https://s2.glbimg.com/jXyWF4ADoBKr5iDoc1cVX1IC_dw=/i.s3.glbimg.com/v1/AUTH_e84042ef78cb4708aeebdf1c68c6cbd6/internal_photos/bs/2025/4/V/exCOZxTdy475FMuDRk3Q/joaopedro-bbb-25.png", IsActive: true},
-		{ID: "vitoria", Name: "Vitória Strada", ImageURL: "https://s2.glbimg.com/PoantXfakW-hCaMT8vwfzWniQDM=/i.s3.glbimg.com/v1/AUTH_e84042ef78cb4708aeebdf1c68c6cbd6/internal_photos/bs/2025/6/r/RL6bRLR2yrvZTOHA0E7Q/vitoria-bbb-25.png", IsActive: true},
-		{ID: "mateus", Name: "Mateus", ImageURL: "https://s2.glbimg.com/4dDnO_vHi9lRvQgckLqIB-cIaOc=/i.s3.glbimg.com/v1/AUTH_e84042ef78cb4708aeebdf1c68c6cbd6/internal_photos/bs/2025/A/F/5evWSESmuY2k9WwG9rFg/mateus-bbb-25.png", Status: "eliminado", IsActive: false},
+var participants = make(map[int]Participant)
+var currentVoting *Voting
+var votingStatus = VotingStatus{
+	IsEnabled: false,
+}
+var votingHistory []VotingHistory
+
+func init() {
+	// Inicializa os participantes com IDs numéricos
+	participantsList := []Participant{
+		{ID: 1, Name: "Aline", ImageURL: "https://s2.glbimg.com/BP82Ew-JnAgxPxFnvIhvdqaLsPs=/i.s3.glbimg.com/v1/AUTH_e84042ef78cb4708aeebdf1c68c6cbd6/internal_photos/bs/2025/6/K/3rOk79SQiWAqL0AnZxJw/aline-bbb-25.png", Status: "eliminado", IsActive: false},
+		{ID: 2, Name: "Vinícius", ImageURL: "https://s2.glbimg.com/HY3hReI2ddPdQbzfutbdIIoe8eQ=/i.s3.glbimg.com/v1/AUTH_e84042ef78cb4708aeebdf1c68c6cbd6/internal_photos/bs/2025/P/7/OTwcPASPGP4gbmy3QsuA/vinicius-bbb-25.png", IsActive: true},
+		{ID: 3, Name: "Arleane", ImageURL: "https://s2.glbimg.com/cig7f5qU-1V2WE14Rj-MHsqxwMo=/i.s3.glbimg.com/v1/AUTH_e84042ef78cb4708aeebdf1c68c6cbd6/internal_photos/bs/2025/A/u/ncRjVERJAv9VjvMpiQyA/arleane-bbb-25.png", Status: "eliminado", IsActive: false},
+		{ID: 4, Name: "Marcelo", ImageURL: "https://s2.glbimg.com/3reaY-P_hhUQkJnj3hzaj4H2V_g=/i.s3.glbimg.com/v1/AUTH_e84042ef78cb4708aeebdf1c68c6cbd6/internal_photos/bs/2025/0/T/sBh6wlRx6CBU2QX7m6lA/marcelo-bbb-25.png", Status: "eliminado", IsActive: false},
+		{ID: 5, Name: "Camilla", ImageURL: "https://s2.glbimg.com/2x_1MSjYLO1zaHfHjXnM3RlRdtM=/i.s3.glbimg.com/v1/AUTH_e84042ef78cb4708aeebdf1c68c6cbd6/internal_photos/bs/2025/w/R/5qAqGiTEArB0yMUptk5A/camila-bbb-25.png", Status: "eliminado", IsActive: false},
+		{ID: 6, Name: "Thamiris", ImageURL: "https://s2.glbimg.com/PY0BHk7p8bhg2VIimyKS24d1P04=/i.s3.glbimg.com/v1/AUTH_e84042ef78cb4708aeebdf1c68c6cbd6/internal_photos/bs/2025/i/S/At5qCZSz6EqHtvBTJHLw/thamiris-bbb-25.png", Status: "eliminado", IsActive: false},
+		{ID: 7, Name: "Daniele Hypolito", ImageURL: "https://s2.glbimg.com/tMhq3B0Tz4cukRi0AMKyr5eeoGw=/i.s3.glbimg.com/v1/AUTH_e84042ef78cb4708aeebdf1c68c6cbd6/internal_photos/bs/2025/h/2/22pebxTkGxchRBUlK8MQ/daniele-bbb-25.png", IsActive: true},
+		{ID: 8, Name: "Diego Hypolito", ImageURL: "https://s2.glbimg.com/zMwedNYl83ucrGEep3QspGvC2NM=/i.s3.glbimg.com/v1/AUTH_e84042ef78cb4708aeebdf1c68c6cbd6/internal_photos/bs/2025/L/M/TWeMYUTx2BTlJM5qRKtQ/diego-bbb-25.png", IsActive: true},
+		{ID: 9, Name: "Diogo Almeida", ImageURL: "https://s2.glbimg.com/G96s9uUh5NelnbCSCfXLXE6qoeQ=/i.s3.glbimg.com/v1/AUTH_e84042ef78cb4708aeebdf1c68c6cbd6/internal_photos/bs/2025/b/y/RwiHQzSkWIbm5YIHga0w/diogo-bbb-25.png", Status: "eliminado", IsActive: false},
+		{ID: 10, Name: "Vilma", ImageURL: "https://s2.glbimg.com/b5Q-1gz6YZZR2osc7Z6IHIgg0Qo=/i.s3.glbimg.com/v1/AUTH_e84042ef78cb4708aeebdf1c68c6cbd6/internal_photos/bs/2025/Q/B/prKIZiQAGkJPRtHrRirw/vilma-bbb-25.png", IsActive: true},
+		{ID: 11, Name: "Edilberto", ImageURL: "https://s2.glbimg.com/T2-nzU8RGQYWt1jWUGofUYwWkoE=/i.s3.glbimg.com/v1/AUTH_e84042ef78cb4708aeebdf1c68c6cbd6/internal_photos/bs/2025/l/5/P8dJ0BSPmTeCeeb0Caiw/edilberto-bbb-25.png", Status: "eliminado", IsActive: false},
+		{ID: 12, Name: "Raissa", ImageURL: "https://s2.glbimg.com/07z_KxTItCLUX9a9QerzK4RJYXE=/i.s3.glbimg.com/v1/AUTH_e84042ef78cb4708aeebdf1c68c6cbd6/internal_photos/bs/2025/D/t/raObCaTgA5niMPugBMKg/raissa-bbb-25.png", Status: "eliminado", IsActive: false},
+		{ID: 13, Name: "Eva", ImageURL: "https://s2.glbimg.com/iWVO7h3QlGiV8BwD0RYDx7cEwxU=/i.s3.glbimg.com/v1/AUTH_e84042ef78cb4708aeebdf1c68c6cbd6/internal_photos/bs/2025/L/B/wM4kF4Tpy0SpX2sA4rwQ/eva-bbb-25.png", IsActive: true},
+		{ID: 14, Name: "Renata", ImageURL: "https://s2.glbimg.com/NWPDpEC0-wPrndUxzfLjoCqRUcw=/i.s3.glbimg.com/v1/AUTH_e84042ef78cb4708aeebdf1c68c6cbd6/internal_photos/bs/2025/t/r/zVRCCJQCivrP42Wnlstg/renata-bbb-25.png", Status: "líder", IsActive: true},
+		{ID: 15, Name: "Gabriel", ImageURL: "https://s2.glbimg.com/0xNq2yiP56tVmQTrsJugX9F16Ds=/i.s3.glbimg.com/v1/AUTH_e84042ef78cb4708aeebdf1c68c6cbd6/internal_photos/bs/2025/G/u/PtDQNWQvat18KX5MrbxQ/gabriel-bbb-25.png", Status: "eliminado", IsActive: false},
+		{ID: 16, Name: "Maike", ImageURL: "https://s2.glbimg.com/kT69XDgS68cKcD2oQx11OBpwZFg=/i.s3.glbimg.com/v1/AUTH_e84042ef78cb4708aeebdf1c68c6cbd6/internal_photos/bs/2025/3/e/DcDKDsT1KFSELrDBP8CQ/maike-bbb-25.png", IsActive: true},
+		{ID: 17, Name: "Gracyanne Barbosa", ImageURL: "https://s2.glbimg.com/-dBPW_G7xXmtTVTY4He-CsGqiR4=/i.s3.glbimg.com/v1/AUTH_e84042ef78cb4708aeebdf1c68c6cbd6/internal_photos/bs/2025/O/b/2aAkGqQVye0oLJBQNpjw/gracyanne-bbb-25.png", Status: "eliminado", IsActive: false},
+		{ID: 18, Name: "Giovanna", ImageURL: "https://s2.glbimg.com/cCqbmUTyM5JkF81LA0FDA7UOc7U=/i.s3.glbimg.com/v1/AUTH_e84042ef78cb4708aeebdf1c68c6cbd6/internal_photos/bs/2025/W/8/lDhnWkT1G14vIqdGDA1Q/giovanna-bbb-25.png", Status: "eliminado", IsActive: false},
+		{ID: 19, Name: "Guilherme", ImageURL: "https://s2.glbimg.com/DmsApwFL9BbGa8mJVI38sFGOMVY=/i.s3.glbimg.com/v1/AUTH_e84042ef78cb4708aeebdf1c68c6cbd6/internal_photos/bs/2025/z/F/MAL0oiQWy522aXB9Q0tw/guilherme-bbb-25.png", IsActive: true},
+		{ID: 20, Name: "Joselma", ImageURL: "https://s2.glbimg.com/kOXnDmx4ZRe9BKv-PI_tYdZutGM=/i.s3.glbimg.com/v1/AUTH_e84042ef78cb4708aeebdf1c68c6cbd6/internal_photos/bs/2025/a/l/UwBn2JQj2glsBZN4TyiA/joselma-bbb-25.png", IsActive: true},
+		{ID: 21, Name: "João Gabriel", ImageURL: "https://s2.glbimg.com/L6FYUD9bMsw-P--MJZbDuhjudQQ=/i.s3.glbimg.com/v1/AUTH_e84042ef78cb4708aeebdf1c68c6cbd6/internal_photos/bs/2025/1/7/LlAxWeTiOwAmMwPnJAZw/joaogabriel-bbb-25.png", IsActive: true},
+		{ID: 22, Name: "João Pedro", ImageURL: "https://s2.glbimg.com/jXyWF4ADoBKr5iDoc1cVX1IC_dw=/i.s3.glbimg.com/v1/AUTH_e84042ef78cb4708aeebdf1c68c6cbd6/internal_photos/bs/2025/4/V/exCOZxTdy475FMuDRk3Q/joaopedro-bbb-25.png", IsActive: true},
+		{ID: 23, Name: "Vitória Strada", ImageURL: "https://s2.glbimg.com/PoantXfakW-hCaMT8vwfzWniQDM=/i.s3.glbimg.com/v1/AUTH_e84042ef78cb4708aeebdf1c68c6cbd6/internal_photos/bs/2025/6/r/RL6bRLR2yrvZTOHA0E7Q/vitoria-bbb-25.png", IsActive: true},
+		{ID: 24, Name: "Mateus", ImageURL: "https://s2.glbimg.com/4dDnO_vHi9lRvQgckLqIB-cIaOc=/i.s3.glbimg.com/v1/AUTH_e84042ef78cb4708aeebdf1c68c6cbd6/internal_photos/bs/2025/A/F/5evWSESmuY2k9WwG9rFg/mateus-bbb-25.png", Status: "eliminado", IsActive: false},
 	}
 
-	votingStatus = VotingStatus{
-		IsEnabled: false,
+	for _, p := range participantsList {
+		participants[p.ID] = p
 	}
-
-	votingHistory []VotingHistory
-)
+}
 
 func enableCORS(w *http.ResponseWriter) {
 	(*w).Header().Set("Access-Control-Allow-Origin", "*")
@@ -120,7 +133,7 @@ func handleStartVoting(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var request struct {
-		ParticipantIDs []string `json:"participantIds"`
+		ParticipantIDs []int `json:"participantIds"`
 	}
 
 	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
@@ -139,7 +152,7 @@ func handleStartVoting(w http.ResponseWriter, r *http.Request) {
 	for _, id := range request.ParticipantIDs {
 		participant, exists := participants[id]
 		if !exists {
-			http.Error(w, fmt.Sprintf("Participante não encontrado: %s", id), http.StatusBadRequest)
+			http.Error(w, fmt.Sprintf("Participante não encontrado: %d", id), http.StatusBadRequest)
 			return
 		}
 		if participant.Status == "líder" {
@@ -150,11 +163,12 @@ func handleStartVoting(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Inicia a votação
-	currentVoting = &Voting{
-		ID:           uuid.New().String(),
+	votingStatus = VotingStatus{
+		IsEnabled:    true,
+		StartTime:    time.Now().Format(time.RFC3339),
+		TotalVotes:   0,
 		Participants: selectedParticipants,
-		StartTime:    time.Now(),
-		Votes:        make(map[string]int),
+		Votes:        make(map[int]int),
 	}
 
 	// Atualiza o status dos participantes
@@ -199,16 +213,13 @@ func endVoting(w http.ResponseWriter, r *http.Request) {
 		log.Printf("Vencedor do paredão: %s com %d votos", winner.Name, winner.Votes)
 
 		// Atualizar status dos participantes
-		for i := range participants {
-			for _, p := range votingStatus.Participants {
-				if participants[i].ID == p.ID {
-					if p.ID != winner.ID {
-						participants[i].Status = "eliminado"
-						participants[i].IsActive = false
-						log.Printf("Participante eliminado: %s", participants[i].Name)
-					}
-					break
-				}
+		for _, p := range votingStatus.Participants {
+			if p.ID != winner.ID {
+				participant := participants[p.ID]
+				participant.Status = "eliminado"
+				participant.IsActive = false
+				participants[p.ID] = participant
+				log.Printf("Participante eliminado: %s", participant.Name)
 			}
 		}
 	} else {
@@ -218,11 +229,10 @@ func endVoting(w http.ResponseWriter, r *http.Request) {
 	// Criar histórico
 	history := VotingHistory{
 		ID:           time.Now().Format("20060102150405"),
-		StartTime:    votingStatus.StartTime,
-		EndTime:      time.Now().Format(time.RFC3339),
-		TotalVotes:   votingStatus.TotalVotes,
 		Participants: votingStatus.Participants,
 		Winner:       winner,
+		TotalVotes:   votingStatus.TotalVotes,
+		EndTime:      time.Now(),
 	}
 	votingHistory = append(votingHistory, history)
 	log.Printf("Histórico atualizado. Total de paredões: %d", len(votingHistory))
@@ -243,43 +253,46 @@ func getVotingHistory(w http.ResponseWriter, r *http.Request) {
 	log.Println("Histórico enviado com sucesso")
 }
 
-func vote(w http.ResponseWriter, r *http.Request) {
+func handleVote(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
-		log.Printf("Método não permitido: %s", r.Method)
 		http.Error(w, "Método não permitido", http.StatusMethodNotAllowed)
 		return
 	}
 
 	if !votingStatus.IsEnabled {
-		log.Println("Tentativa de votar em paredão inativo")
-		http.Error(w, "Nenhuma votação em andamento", http.StatusBadRequest)
+		http.Error(w, "Votação não está ativa", http.StatusBadRequest)
 		return
 	}
 
 	var request struct {
-		Participante string `json:"participante"`
+		ParticipantID int `json:"participantId"`
 	}
+
 	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
-		log.Printf("Erro ao decodificar voto: %v", err)
 		http.Error(w, "Erro ao decodificar requisição", http.StatusBadRequest)
 		return
 	}
 
-	log.Printf("Voto recebido para o participante: %s", request.Participante)
-
-	for i := range votingStatus.Participants {
-		if votingStatus.Participants[i].ID == request.Participante {
-			votingStatus.Participants[i].Votes++
-			votingStatus.TotalVotes++
-			log.Printf("Voto registrado para %s. Total de votos: %d", 
-				votingStatus.Participants[i].Name, 
-				votingStatus.Participants[i].Votes)
-			break
-		}
+	// Verifica se o participante está no paredão
+	participant, exists := participants[request.ParticipantID]
+	if !exists {
+		http.Error(w, "Participante não encontrado", http.StatusNotFound)
+		return
 	}
 
+	if participant.Status != "no paredão" {
+		http.Error(w, "Participante não está no paredão", http.StatusBadRequest)
+		return
+	}
+
+	// Registra o voto
+	votingStatus.Votes[request.ParticipantID]++
+	votingStatus.TotalVotes++
+
 	w.WriteHeader(http.StatusOK)
-	log.Printf("Total de votos no paredão: %d", votingStatus.TotalVotes)
+	json.NewEncoder(w).Encode(map[string]string{
+		"message": "Voto registrado com sucesso",
+	})
 }
 
 func updateParticipantStatus(w http.ResponseWriter, r *http.Request) {
@@ -299,12 +312,17 @@ func updateParticipantStatus(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	for i := range participants {
-		if participants[i].ID == participantID {
-			participants[i].Status = request.Status
-			w.WriteHeader(http.StatusOK)
-			return
-		}
+	id, err := strconv.Atoi(participantID)
+	if err != nil {
+		http.Error(w, "ID de participante inválido", http.StatusBadRequest)
+		return
+	}
+
+	if participant, exists := participants[id]; exists {
+		participant.Status = request.Status
+		participants[id] = participant
+		w.WriteHeader(http.StatusOK)
+		return
 	}
 
 	http.Error(w, "Participante não encontrado", http.StatusNotFound)
@@ -327,12 +345,17 @@ func updateParticipantActive(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	for i := range participants {
-		if participants[i].ID == participantID {
-			participants[i].IsActive = request.IsActive
-			w.WriteHeader(http.StatusOK)
-			return
-		}
+	id, err := strconv.Atoi(participantID)
+	if err != nil {
+		http.Error(w, "ID de participante inválido", http.StatusBadRequest)
+		return
+	}
+
+	if participant, exists := participants[id]; exists {
+		participant.IsActive = request.IsActive
+		participants[id] = participant
+		w.WriteHeader(http.StatusOK)
+		return
 	}
 
 	http.Error(w, "Participante não encontrado", http.StatusNotFound)
@@ -360,7 +383,7 @@ func main() {
 	http.HandleFunc("/iniciar-votacao", corsMiddleware(handleStartVoting))
 	http.HandleFunc("/encerrar-votacao", corsMiddleware(endVoting))
 	http.HandleFunc("/historico", corsMiddleware(getVotingHistory))
-	http.HandleFunc("/votar", corsMiddleware(vote))
+	http.HandleFunc("/votar", corsMiddleware(handleVote))
 
 	log.Println("Rotas configuradas com sucesso")
 	log.Fatal(http.ListenAndServe(":8080", nil))

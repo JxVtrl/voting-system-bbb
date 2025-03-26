@@ -1,12 +1,13 @@
 import { useEffect, useState } from 'react';
 import styled from 'styled-components';
-import { Participant, VotingStatus } from '../types';
-import { api } from '../services/api';
+import { Participant, VotingStatus } from '@/types';
+import { api } from '@/services/api';
 import Head from 'next/head';
 import { VotingPanel } from '@/components/VotingPanel';
 import { ParticipantsScroll } from '@/components/ParticipantsScroll';
 import { AdminMenu } from '@/components/AdminMenu';
 import { Toaster } from '@/components/ui/sonner';
+import { toast } from 'sonner';
 
 const PageContainer = styled.div`
   min-height: 100vh;
@@ -78,6 +79,15 @@ const ErrorContainer = styled.div`
   color: #ff4444;
 `;
 
+interface ParticipantResponse {
+  id: string;
+  name: string;
+  imageUrl: string;
+  status?: 'eliminado' | 'líder' | 'normal';
+  isActive?: boolean;
+  votes?: number;
+}
+
 export default function Home() {
   const [participants, setParticipants] = useState<Participant[]>([]);
   const [votingStatus, setVotingStatus] = useState<VotingStatus>({
@@ -91,11 +101,19 @@ export default function Home() {
   useEffect(() => {
     async function loadData() {
       try {
-        const [participantsData, statusData] = await Promise.all([
+        const [participantsResponse, statusData] = await Promise.all([
           api.getParticipants(),
           api.getVotingStatus()
         ]);
-        setParticipants(participantsData);
+        const participantsArray = Object.values(participantsResponse).map((p: ParticipantResponse) => ({
+          id: p.id,
+          name: p.name,
+          imageUrl: p.imageUrl,
+          status: p.status,
+          isActive: p.isActive ?? true,
+          votes: p.votes ?? 0
+        })) as Participant[];
+        setParticipants(participantsArray);
         setVotingStatus(statusData);
       } catch (err) {
         setError('Erro ao carregar dados');
@@ -125,9 +143,10 @@ export default function Home() {
       await api.vote(participantId);
       const newStatus = await api.getVotingStatus();
       setVotingStatus(newStatus);
+      toast.success('Voto registrado com sucesso!');
     } catch (err) {
       console.error(err);
-      alert('Erro ao registrar voto');
+      toast.error('Erro ao registrar voto');
     }
   };
 
@@ -152,7 +171,7 @@ export default function Home() {
         </Header>
 
         <ContentContainer>
-          <ParticipantsScroll participants={participants} />
+          <ParticipantsScroll />
 
           <VotingPanel
             participants={votingStatus.participants}

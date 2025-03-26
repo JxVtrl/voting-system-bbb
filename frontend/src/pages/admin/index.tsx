@@ -1,24 +1,18 @@
 import { useState, useEffect } from 'react';
 import Head from 'next/head';
 import Image from 'next/image';
-import Link from 'next/link';
 import ParticipantSelectionModal from '../../components/ParticipantSelectionModal';
+import { Participant, VotingStatus } from '@/types';
+import { api } from '@/services/api';
+import AdminLayout from '../../components/AdminLayout';
 
-interface Participant {
+interface ParticipantResponse {
   id: string;
   name: string;
   imageUrl: string;
-  status?: string;
-  isActive: boolean;
+  status?: 'eliminado' | 'líder' | 'normal';
+  isActive?: boolean;
   votes?: number;
-}
-
-interface VotingStatus {
-  isEnabled: boolean;
-  startTime?: string;
-  endTime?: string;
-  totalVotes: number;
-  participants: Participant[];
 }
 
 export default function Admin() {
@@ -28,33 +22,31 @@ export default function Admin() {
     totalVotes: 0,
     participants: []
   });
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const [isSelectionModalOpen, setIsSelectionModalOpen] = useState(false);
 
   const fetchParticipants = async () => {
     try {
-      const response = await fetch('http://localhost:8080/participantes');
-      if (!response.ok) throw new Error('Erro ao buscar participantes');
-      const data = await response.json();
-      setParticipants(data);
+      const response = await api.getParticipants();
+      const participantsArray = Object.values(response).map((p: ParticipantResponse) => ({
+        id: p.id,
+        name: p.name,
+        imageUrl: p.imageUrl,
+        status: p.status,
+        isActive: p.isActive ?? true,
+        votes: p.votes ?? 0
+      })) as Participant[];
+      setParticipants(participantsArray);
     } catch (err) {
-      setError('Erro ao carregar participantes');
       console.error('Erro ao buscar participantes:', err);
     }
   };
 
   const fetchVotingStatus = async () => {
     try {
-      const response = await fetch('http://localhost:8080/status');
-      if (!response.ok) throw new Error('Erro ao buscar status');
-      const data = await response.json();
-      setVotingStatus(data);
+      const status = await api.getVotingStatus();
+      setVotingStatus(status);
     } catch (err) {
-      setError('Erro ao carregar status da votação');
       console.error('Erro ao buscar status:', err);
-    } finally {
-      setIsLoading(false);
     }
   };
 
@@ -67,124 +59,84 @@ export default function Admin() {
 
   const handleStartVoting = async (selectedIds: string[]) => {
     try {
-      const response = await fetch('http://localhost:8080/iniciar-votacao', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ participantes: selectedIds }),
-      });
-
-      if (!response.ok) throw new Error('Erro ao iniciar votação');
-      
+      await api.startVoting(selectedIds);
       fetchVotingStatus();
     } catch (err) {
       console.error('Erro ao iniciar votação:', err);
-      setError('Erro ao iniciar votação');
     }
   };
 
   const handleEndVoting = async () => {
     try {
-      const response = await fetch('http://localhost:8080/encerrar-votacao', {
-        method: 'POST',
-      });
-
-      if (!response.ok) throw new Error('Erro ao encerrar votação');
-      
+      await api.endVoting();
       fetchVotingStatus();
     } catch (err) {
       console.error('Erro ao encerrar votação:', err);
-      setError('Erro ao encerrar votação');
     }
   };
 
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-gray-100 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="min-h-screen bg-gray-100 flex items-center justify-center">
-        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
-          <p>{error}</p>
-        </div>
-      </div>
-    );
-  }
-
   return (
-    <div className="min-h-screen bg-gray-100">
+    <AdminLayout>
       <Head>
-        <title>BBB 25 - Painel Administrativo</title>
+        <title>Dashboard - BBB 25</title>
         <meta name="description" content="Painel administrativo do sistema de votação BBB 25" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
-      <main className="container mx-auto px-4 py-8">
-        <div className="flex justify-between items-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">Painel Administrativo</h1>
-          <div className="space-x-4">
-            <Link href="/admin/participantes" className="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600">
-              Gerenciar Participantes
-            </Link>
-            <Link href="/admin/votacoes" className="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600">
-              Histórico de Votações
-            </Link>
-          </div>
+      <div className="space-y-6">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
+          <p className="text-sm text-gray-500 mt-1">Gerencie as votações do BBB 25</p>
         </div>
 
         {/* Status da Votação */}
-        <div className="bg-white rounded-lg shadow-md p-6 mb-8">
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">Status da Votação</h2>
-          <div className="flex items-center space-x-4">
-            <div className="flex items-center">
-              <div className={`w-3 h-3 rounded-full mr-2 ${votingStatus.isEnabled ? 'bg-green-500' : 'bg-red-500'}`}></div>
-              <span className="text-gray-900 font-medium">
-                {votingStatus.isEnabled ? 'Votação Ativa' : 'Votação Inativa'}
-              </span>
-            </div>
-            {votingStatus.isEnabled && (
-              <div className="text-gray-700">
-                <p className="font-medium">Início: {new Date(votingStatus.startTime!).toLocaleString()}</p>
-                <p className="font-medium">Fim: {new Date(votingStatus.endTime!).toLocaleString()}</p>
+        <div className="bg-white shadow-sm rounded-lg p-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-lg font-medium text-gray-900">Status da Votação</h2>
+              <div className="mt-2 flex items-center space-x-2">
+                <div className={`w-2 h-2 rounded-full ${votingStatus.isEnabled ? 'bg-green-500' : 'bg-red-500'}`}></div>
+                <span className="text-sm text-gray-600">
+                  {votingStatus.isEnabled ? 'Votação Ativa' : 'Votação Inativa'}
+                </span>
               </div>
-            )}
+              {votingStatus.isEnabled && votingStatus.startTime && votingStatus.endTime && (
+                <div className="mt-4 space-y-1">
+                  <p className="text-sm text-gray-600">
+                    Início: {new Date(votingStatus.startTime).toLocaleString()}
+                  </p>
+                  <p className="text-sm text-gray-600">
+                    Fim: {new Date(votingStatus.endTime).toLocaleString()}
+                  </p>
+                </div>
+              )}
+            </div>
+            <div className="flex space-x-3">
+              <button
+                onClick={() => setIsSelectionModalOpen(true)}
+                disabled={votingStatus.isEnabled}
+                className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                Iniciar Paredão
+              </button>
+              <button
+                onClick={handleEndVoting}
+                disabled={!votingStatus.isEnabled}
+                className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                Encerrar Votação
+              </button>
+            </div>
           </div>
         </div>
 
-        {/* Controles de Votação */}
-        <div className="bg-white rounded-lg shadow-md p-6 mb-8">
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">Controles de Votação</h2>
-          <div className="flex space-x-4">
-            <button
-              onClick={() => setIsSelectionModalOpen(true)}
-              disabled={votingStatus.isEnabled}
-              className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              Iniciar Paredão
-            </button>
-            <button
-              onClick={handleEndVoting}
-              disabled={!votingStatus.isEnabled}
-              className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              Encerrar Votação
-            </button>
-          </div>
-        </div>
-
-        {/* Lista de Participantes */}
-        <div className="bg-white rounded-lg shadow-md p-6">
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">
+        {/* Participantes do Paredão */}
+        <div className="bg-white shadow-sm rounded-lg p-6">
+          <h2 className="text-lg font-medium text-gray-900 mb-4">
             {votingStatus.isEnabled ? 'Participantes do Paredão Atual' : 'Nenhum Paredão em Andamento'}
           </h2>
           {votingStatus.isEnabled ? (
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               {votingStatus.participants.map((participant) => (
                 <div
                   key={participant.id}
@@ -200,8 +152,8 @@ export default function Admin() {
                       />
                     </div>
                     <div>
-                      <h3 className="font-semibold text-gray-900">{participant.name}</h3>
-                      <p className="text-sm font-medium text-gray-700">
+                      <h3 className="font-medium text-gray-900">{participant.name}</h3>
+                      <p className="text-sm text-gray-600 mt-1">
                         Votos: {participant.votes?.toLocaleString() || '0'}
                       </p>
                     </div>
@@ -210,12 +162,12 @@ export default function Admin() {
               ))}
             </div>
           ) : (
-            <p className="text-gray-700 text-center py-4">
-              Clique em &rdquo;Iniciar Paredão&rdquo; para selecionar os participantes
+            <p className="text-gray-500 text-center py-4">
+              Clique em "Iniciar Paredão" para selecionar os participantes
             </p>
           )}
         </div>
-      </main>
+      </div>
 
       <ParticipantSelectionModal
         isOpen={isSelectionModalOpen}
@@ -223,6 +175,6 @@ export default function Admin() {
         participants={participants}
         onStartVoting={handleStartVoting}
       />
-    </div>
+    </AdminLayout>
   );
 } 

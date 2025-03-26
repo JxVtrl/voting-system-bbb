@@ -1,19 +1,21 @@
+import { Participant, VotingStatus, VotingHistory } from '@/types';
+
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080';
 
 export const api = {
-  async getParticipants() {
+  async getParticipants(): Promise<Record<string, Participant>> {
     const response = await fetch(`${API_URL}/participantes`);
     if (!response.ok) throw new Error('Erro ao buscar participantes');
     return response.json();
   },
 
-  async getVotingStatus() {
+  async getVotingStatus(): Promise<VotingStatus> {
     const response = await fetch(`${API_URL}/status`);
     if (!response.ok) throw new Error('Erro ao buscar status da votação');
     return response.json();
   },
 
-  async vote(participantId: string) {
+  async vote(participantId: string): Promise<{ success: boolean }> {
     const response = await fetch(`${API_URL}/votar`, {
       method: 'POST',
       headers: {
@@ -25,7 +27,7 @@ export const api = {
     return response.json();
   },
 
-  async startVoting(participantIds: string[]) {
+  async startVoting(participantIds: string[]): Promise<{ success: boolean }> {
     const response = await fetch(`${API_URL}/iniciar-votacao`, {
       method: 'POST',
       headers: {
@@ -37,7 +39,7 @@ export const api = {
     return response.json();
   },
 
-  async endVoting() {
+  async endVoting(): Promise<{ success: boolean }> {
     const response = await fetch(`${API_URL}/encerrar-votacao`, {
       method: 'POST',
     });
@@ -45,7 +47,7 @@ export const api = {
     return response.json();
   },
 
-  async getVotingHistory() {
+  async getVotingHistory(): Promise<VotingHistory[]> {
     const response = await fetch(`${API_URL}/historico`);
     if (!response.ok) throw new Error('Erro ao buscar histórico');
     return response.json();

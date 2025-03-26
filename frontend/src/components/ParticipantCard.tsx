@@ -1,22 +1,19 @@
 import Image from 'next/image';
+import { Participant } from '@/types';
 
 interface ParticipantCardProps {
-  name: string;
-  imageUrl: string;
-  votes: number;
+  participant: Participant;
   onVote: () => void;
   isVotingEnabled: boolean;
-  status?: string;
 }
 
 export default function ParticipantCard({
-  name,
-  imageUrl,
-  votes,
+  participant,
   onVote,
   isVotingEnabled,
-  status
 }: ParticipantCardProps) {
+  const { name, imageUrl, votes = 0, status } = participant;
+
   return (
     <div className="bg-white rounded-lg shadow-lg overflow-hidden">
       <div className="relative h-64">
@@ -27,7 +24,11 @@ export default function ParticipantCard({
           className="object-cover"
         />
         {status && (
-          <div className="absolute top-2 right-2 bg-yellow-500 text-white px-2 py-1 rounded-full text-sm font-semibold">
+          <div className={`absolute top-2 right-2 px-2 py-1 rounded-full text-sm font-semibold text-white ${
+            status === 'líder' ? 'bg-yellow-500' :
+            status === 'eliminado' ? 'bg-red-500' :
+            'bg-blue-500'
+          }`}>
             {status}
           </div>
         )}
