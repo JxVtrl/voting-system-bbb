@@ -3,7 +3,7 @@ import Head from 'next/head';
 import Image from 'next/image';
 import { VotingHistory } from '@/types';
 import { api } from '@/services/api';
-import AdminLayout from '../../components/AdminLayout';
+import AdminLayout from '@/components/admin/Layout';
 
 export default function VotingHistoryPage() {
   const [votingHistory, setVotingHistory] = useState<VotingHistory[]>([]);

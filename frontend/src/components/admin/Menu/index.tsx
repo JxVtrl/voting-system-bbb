@@ -1,99 +1,10 @@
-import styled from 'styled-components';
 import { toast } from 'sonner';
-import { api } from '../services/api';
-import { Participant, VotingHistory } from '../types';
+import { api } from '@/services/api';
+import { Participant, VotingHistory } from '@/types';
 import { useRouter } from 'next/router';
 import { useState } from 'react';
-import { ParedaoModal } from './ParedaoModal';
-
-const AdminButton = styled.button`
-  position: fixed;
-  top: 20px;
-  right: 20px;
-  background: #1a365d;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  padding: 8px 16px;
-  cursor: pointer;
-  font-size: 14px;
-  transition: all 0.2s ease;
-  z-index: 100;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-
-  &:hover {
-    background: #2c5282;
-    transform: translateY(-1px);
-  }
-`;
-
-const MenuContent = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  padding: 4px;
-  width: 100%;
-  min-width: 300px;
-`;
-
-const MenuHeader = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-bottom: 8px;
-  padding-bottom: 8px;
-  border-bottom: 1px solid #e2e8f0;
-`;
-
-const MenuTitle = styled.h3`
-  color: #1a365d;
-  font-size: 1.1rem;
-  font-weight: 600;
-  margin: 0;
-`;
-
-const MenuButton = styled.button<{ $variant?: 'danger' | 'secondary' }>`
-  background: ${props => {
-    switch (props.$variant) {
-      case 'danger':
-        return '#dc3545';
-      case 'secondary':
-        return '#718096';
-      default:
-        return '#3182ce';
-    }
-  }};
-  color: white;
-  border: none;
-  border-radius: 6px;
-  padding: 10px 16px;
-  cursor: pointer;
-  font-size: 0.95rem;
-  width: 100%;
-  text-align: left;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  transition: all 0.2s ease;
-
-  &:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-  }
-
-  &:disabled {
-    background: #cbd5e0;
-    cursor: not-allowed;
-    transform: none;
-    box-shadow: none;
-  }
-`;
-
-const MenuDivider = styled.div`
-  height: 1px;
-  background: #e2e8f0;
-  margin: 4px 0;
-`;
+import { ParedaoModal } from '@/components/voting/Modal';
+import styles from './styles.module.scss';
 
 interface AdminMenuProps {
   participants: Participant[];
@@ -161,12 +72,15 @@ export function AdminMenu({ participants, isVotingEnabled }: AdminMenuProps) {
     toast.info('', {
       id: 'admin-menu',
       description: (
-        <MenuContent>
-          <MenuHeader>
-            <MenuTitle>Menu Administrativo</MenuTitle>
-          </MenuHeader>
+        <div className={styles.adminMenuContent}>
+          <div className={styles.adminMenuHeader}>
+            <h3 className={styles.adminMenuTitle}>Menu Administrativo</h3>
+          </div>
 
-          <MenuButton
+          <button
+            className={`${styles.adminMenuButton} ${
+              isVotingEnabled ? styles.adminMenuButtonDanger : ''
+            }`}
             onClick={() => {
               if (isVotingEnabled) {
                 handleEndVoting();
@@ -175,53 +89,55 @@ export function AdminMenu({ participants, isVotingEnabled }: AdminMenuProps) {
               }
               toast.dismiss('admin-menu');
             }}
-            $variant={isVotingEnabled ? 'danger' : undefined}
           >
             {isVotingEnabled ? 'Encerrar Votação' : 'Iniciar Nova Votação'}
-          </MenuButton>
+          </button>
 
-          <MenuButton
+          <button
+            className={`${styles.adminMenuButton} ${styles.adminMenuButtonSecondary}`}
             onClick={() => {
               handleShowHistory();
               toast.dismiss('admin-menu');
             }}
-            $variant="secondary"
           >
             Ver Histórico
-          </MenuButton>
+          </button>
 
-          <MenuDivider />
+          <div className={styles.adminMenuDivider} />
 
-          <MenuButton
+          <button
+            className={`${styles.adminMenuButton} ${styles.adminMenuButtonSecondary}`}
             onClick={() => {
               router.push('/admin/participantes');
               toast.dismiss('admin-menu');
             }}
           >
             Gerenciar Participantes
-          </MenuButton>
+          </button>
 
-          <MenuButton
+          <button
+            className={`${styles.adminMenuButton} ${styles.adminMenuButtonSecondary}`}
             onClick={() => {
               router.push('/admin/estatisticas');
               toast.dismiss('admin-menu');
             }}
           >
             Estatísticas
-          </MenuButton>
+          </button>
 
-          <MenuButton
+          <button
+            className={`${styles.adminMenuButton} ${styles.adminMenuButtonSecondary}`}
             onClick={() => {
               router.push('/admin/historico');
               toast.dismiss('admin-menu');
             }}
           >
             Histórico Detalhado
-          </MenuButton>
-        </MenuContent>
+          </button>
+        </div>
       ),
       duration: Infinity,
-      className: 'admin-menu-toast',
+      className: styles.adminMenuToast,
       style: {
         background: 'white',
         color: '#1a365d',
@@ -241,9 +157,9 @@ export function AdminMenu({ participants, isVotingEnabled }: AdminMenuProps) {
 
   return (
     <>
-      <AdminButton onClick={showAdminMenu}>
+      <button className={styles.adminMenuButton} onClick={showAdminMenu}>
         Menu Administrativo
-      </AdminButton>
+      </button>
 
       {showParedaoModal && (
         <ParedaoModal

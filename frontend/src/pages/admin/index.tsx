@@ -1,10 +1,10 @@
 import { useState, useEffect } from 'react';
 import Head from 'next/head';
 import Image from 'next/image';
-import ParticipantSelectionModal from '../../components/ParticipantSelectionModal';
+import ParticipantSelectionModal from '@/components/participants/SelectionModal';
 import { Participant, VotingStatus } from '@/types';
 import { api } from '@/services/api';
-import AdminLayout from '../../components/AdminLayout';
+import AdminLayout from '@/components/admin/Layout';
 
 interface ParticipantResponse {
   id: string;
@@ -163,7 +163,7 @@ export default function Admin() {
             </div>
           ) : (
             <p className="text-gray-500 text-center py-4">
-              Clique em "Iniciar Paredão" para selecionar os participantes
+              Clique em &quot;Iniciar Paredão&quot; para selecionar os participantes
             </p>
           )}
         </div>

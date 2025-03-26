@@ -1,0 +1,81 @@
+.participant-card {
+  background-color: white;
+  border-radius: 0.5rem;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+
+  &__image-container {
+    position: relative;
+    height: 16rem;
+  }
+
+  &__image {
+    object-fit: cover;
+  }
+
+  &__status {
+    position: absolute;
+    top: 0.5rem;
+    right: 0.5rem;
+    padding: 0.25rem 0.5rem;
+    border-radius: 9999px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: white;
+
+    &--leader {
+      background-color: #eab308;
+    }
+
+    &--eliminated {
+      background-color: #ef4444;
+    }
+
+    &--default {
+      background-color: #3b82f6;
+    }
+  }
+
+  &__content {
+    padding: 1rem;
+  }
+
+  &__name {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #1f2937;
+    margin-bottom: 0.5rem;
+  }
+
+  &__footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  &__votes {
+    color: #4b5563;
+  }
+
+  &__vote-button {
+    padding: 0.5rem 1rem;
+    border-radius: 9999px;
+    font-weight: 600;
+    transition: background-color 0.2s;
+
+    &--enabled {
+      background-color: #3b82f6;
+      color: white;
+
+      &:hover {
+        background-color: #2563eb;
+      }
+    }
+
+    &--disabled {
+      background-color: #d1d5db;
+      color: #6b7280;
+      cursor: not-allowed;
+    }
+  }
+} 

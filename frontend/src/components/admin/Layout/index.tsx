@@ -11,6 +11,7 @@ import {
   SidebarProvider,
 } from '@/components/ui/sidebar';
 import { LayoutDashboard, Users, Vote, Settings } from 'lucide-react';
+import styles from './styles.module.scss';
 
 interface AdminLayoutProps {
   children: ReactNode;
@@ -29,15 +30,15 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
 
   return (
     <SidebarProvider defaultOpen>
-      <div className="flex min-h-screen bg-gray-50 w-full">
+      <div className={styles.adminLayout}>
         <Sidebar>
-          <SidebarHeader className="p-6">
-            <h1 className="text-2xl font-bold text-gray-900">BBB 25</h1>
-            <p className="text-sm text-gray-500 mt-1">Painel Administrativo</p>
+          <SidebarHeader className={styles.adminLayoutHeader}>
+            <h1 className={styles.adminLayoutTitle}>BBB 25</h1>
+            <p className={styles.adminLayoutSubtitle}>Painel Administrativo</p>
           </SidebarHeader>
 
           <SidebarContent>
-            <SidebarMenu>
+            <SidebarMenu className={styles.adminLayoutMenu}>
               {menuItems.map((item) => {
                 const Icon = item.icon;
                 return (
@@ -47,8 +48,12 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
                       isActive={currentPath === item.path}
                       tooltip={item.label}
                     >
-                      <Link href={item.path}>
-                        <Icon className="h-4 w-4" />
+                      <Link
+                        href={item.path}
+                        className={`${styles.adminLayoutMenuItem} ${currentPath === item.path ? styles.adminLayoutMenuItemActive : ''
+                          }`}
+                      >
+                        <Icon className={styles.adminLayoutMenuIcon} />
                         <span>{item.label}</span>
                       </Link>
                     </SidebarMenuButton>
@@ -59,8 +64,8 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
           </SidebarContent>
         </Sidebar>
 
-        <main className="flex-1 p-8">
-          <div className="max-w-7xl mx-auto">
+        <main className={styles.adminLayoutMain}>
+          <div className={styles.adminLayoutContent}>
             {children}
           </div>
         </main>

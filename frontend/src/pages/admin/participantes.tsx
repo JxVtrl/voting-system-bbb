@@ -3,9 +3,9 @@ import { Participant } from '@/types';
 import { api } from '@/services/api';
 import { toast } from 'sonner';
 import Head from 'next/head';
-import AdminLayout from '../../components/AdminLayout';
+import AdminLayout from '@/components/admin/Layout';
 import Image from 'next/image';
-import ParticipantModal from '../../components/ParticipantModal';
+import ParticipantModal from '@/components/participants/Modal';
 
 export default function GerenciarParticipantes() {
   const [participants, setParticipants] = useState<Participant[]>([]);
@@ -19,7 +19,7 @@ export default function GerenciarParticipantes() {
   const loadParticipants = async () => {
     try {
       const response = await api.getParticipants();
-      const participantsArray = Object.values(response).map((p: any) => ({
+      const participantsArray = Object.values(response).map((p: Participant) => ({
         id: p.id,
         name: p.name,
         imageUrl: p.imageUrl,

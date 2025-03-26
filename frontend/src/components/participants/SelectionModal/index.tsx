@@ -1,0 +1,115 @@
+import { useState } from 'react';
+import Image from 'next/image';
+import { Participant } from '@/types';
+import styles from './styles.module.scss';
+
+interface ParticipantSelectionModalProps {
+    isOpen: boolean;
+    onClose: () => void;
+    participants: Participant[];
+    onStartVoting: (selectedIds: string[]) => void;
+}
+
+export default function ParticipantSelectionModal({
+    isOpen,
+    onClose,
+    participants,
+    onStartVoting,
+}: ParticipantSelectionModalProps) {
+    const [selectedParticipants, setSelectedParticipants] = useState<string[]>([]);
+
+    const toggleParticipantSelection = (participantId: string) => {
+        setSelectedParticipants(prev => {
+            if (prev.includes(participantId)) {
+                return prev.filter(id => id !== participantId);
+            }
+            if (prev.length < 3) {
+                return [...prev, participantId];
+            }
+            return prev;
+        });
+    };
+
+    const handleStartVoting = () => {
+        if (selectedParticipants.length === 3) {
+            onStartVoting(selectedParticipants);
+            onClose();
+        }
+    };
+
+    if (!isOpen) return null;
+
+    return (
+        <div className={styles.participantSelectionModal}>
+            <div className={styles.participantSelectionModalContent}>
+                <div className={styles.participantSelectionModalHeader}>
+                    <h2 className={styles.participantSelectionModalTitle}>Selecionar Participantes para o Paredão</h2>
+                    <button
+                        onClick={onClose}
+                        className={styles.participantSelectionModalCloseButton}
+                    >
+                        <svg className={styles.participantSelectionModalCloseButtonIcon} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                </div>
+
+                <p className={styles.participantSelectionModalDescription}>
+                    Selecione exatamente 3 participantes para o paredão. Apenas participantes ativos estão disponíveis.
+                </p>
+
+                <div className={styles.participantSelectionModalGrid}>
+                    {participants
+                        .filter(p => p.isActive)
+                        .map((participant) => (
+                            <div
+                                key={participant.id}
+                                className={`${styles.participantSelectionModalParticipantCard} ${selectedParticipants.includes(participant.id)
+                                        ? styles.participantSelectionModalParticipantCardSelected
+                                        : ''
+                                    }`}
+                                onClick={() => toggleParticipantSelection(participant.id)}
+                            >
+                                <div className={styles.participantSelectionModalParticipantImage}>
+                                    <Image
+                                        src={participant.imageUrl}
+                                        alt={participant.name}
+                                        fill
+                                        className={styles.participantSelectionModalParticipantImageInner}
+                                    />
+                                    {selectedParticipants.includes(participant.id) && (
+                                        <div className={styles.participantSelectionModalSelectedBadge}>
+                                            Selecionado
+                                        </div>
+                                    )}
+                                </div>
+                                <h3 className={styles.participantSelectionModalParticipantName}>{participant.name}</h3>
+                            </div>
+                        ))}
+                </div>
+
+                <div className="participant-selection-modal__footer">
+                    <p className="participant-selection-modal__selection-count">
+                        {selectedParticipants.length}/3 participantes selecionados
+                    </p>
+                    <div className="participant-selection-modal__actions">
+                        <button
+                            onClick={onClose}
+                            className="participant-selection-modal__cancel-button"
+                        >
+                            Cancelar
+                        </button>
+                        <button
+                            onClick={handleStartVoting}
+                            disabled={selectedParticipants.length !== 3}
+                            className={`participant-selection-modal__start-button participant-selection-modal__start-button--${selectedParticipants.length === 3 ? 'enabled' : 'disabled'
+                                }`}
+                        >
+                            Iniciar Paredão
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+} 

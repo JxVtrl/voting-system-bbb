@@ -3,9 +3,9 @@ import styled from 'styled-components';
 import { Participant, VotingStatus } from '@/types';
 import { api } from '@/services/api';
 import Head from 'next/head';
-import { VotingPanel } from '@/components/VotingPanel';
-import { ParticipantsScroll } from '@/components/ParticipantsScroll';
-import { AdminMenu } from '@/components/AdminMenu';
+import { VotingPanel } from '@/components/voting/Panel';
+import { ParticipantsScroll } from '@/components/participants/Scroller';
+import { AdminMenu } from '@/components/admin/Menu';
 import { Toaster } from '@/components/ui/sonner';
 import { toast } from 'sonner';
 

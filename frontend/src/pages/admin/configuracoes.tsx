@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import Head from 'next/head';
-import AdminLayout from '../../components/AdminLayout';
+import AdminLayout from '@/components/admin/Layout';
 
 export default function Configuracoes() {
   const [configuracoes, setConfiguracoes] = useState({

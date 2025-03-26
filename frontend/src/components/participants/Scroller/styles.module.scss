@@ -1,0 +1,24 @@
+.participants-scroll {
+  width: 100%;
+  overflow-x: auto;
+  padding: 1rem 0;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+
+  &__container {
+    display: flex;
+    gap: 1rem;
+    padding: 0 1rem;
+  }
+
+  &__loading {
+    text-align: center;
+    padding: 2rem;
+    color: #6b7280;
+  }
+} 
