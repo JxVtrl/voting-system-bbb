@@ -93,25 +93,21 @@ export default function Admin() {
         {/* Status da Votação */}
         <div className={styles.adminPageCard}>
           <div className={styles.adminPageCardHeader}>
-            <h2>Status da Votação</h2>
-            <div className="mt-2 flex items-center space-x-2">
-              <span className={`${styles.adminPageStatus} ${
-                votingStatus.isEnabled ? styles.adminPageStatusSuccess : styles.adminPageStatusDanger
+            <span className={`${styles.adminPageStatus} ${votingStatus.isEnabled ? styles.adminPageStatusSuccess : styles.adminPageStatusDanger
               }`}>
-                {votingStatus.isEnabled ? 'Votação Ativa' : 'Votação Inativa'}
-              </span>
-            </div>
+              {votingStatus.isEnabled ? 'Votação Ativa' : 'Votação Inativa'}
+            </span>
             {votingStatus.isEnabled && votingStatus.startTime && votingStatus.endTime && (
-              <div className="mt-4 space-y-1">
-                <p className="text-sm text-gray-600">
+              <div className={styles.adminPageVotingTime}>
+                <p className={styles.adminPageVotingTimeText}>
                   Início: {new Date(votingStatus.startTime).toLocaleString()}
                 </p>
-                <p className="text-sm text-gray-600">
+                <p className={styles.adminPageVotingTimeText}>
                   Fim: {new Date(votingStatus.endTime).toLocaleString()}
                 </p>
               </div>
             )}
-            <div className="flex space-x-3 mt-4">
+            <div className={styles.adminPageButtonGroup}>
               <button
                 onClick={() => setIsSelectionModalOpen(true)}
                 disabled={votingStatus.isEnabled}
@@ -137,7 +133,7 @@ export default function Admin() {
               {votingStatus.isEnabled ? 'Participantes do Paredão Atual' : 'Nenhum Paredão em Andamento'}
             </h2>
           </div>
-          
+
           {votingStatus.isEnabled ? (
             <div className={styles.adminPageCardGrid}>
               {votingStatus.participants.map((participant) => (
@@ -150,12 +146,12 @@ export default function Admin() {
                       src={participant.imageUrl}
                       alt={participant.name}
                       fill
-                      className="object-cover"
+                      className={styles.adminPageParticipantCardImageContent}
                     />
                   </div>
                   <div className={styles.adminPageParticipantCardInfo}>
                     <h3>{participant.name}</h3>
-                    <p>
+                    <p className={styles.adminPageParticipantVotes}>
                       Votos: {participant.votes?.toLocaleString() || '0'}
                     </p>
                   </div>
@@ -163,7 +159,7 @@ export default function Admin() {
               ))}
             </div>
           ) : (
-            <p className="text-gray-500 text-center py-4">
+            <p className={styles.adminPageEmptyMessage}>
               Clique em &quot;Iniciar Paredão&quot; para selecionar os participantes
             </p>
           )}

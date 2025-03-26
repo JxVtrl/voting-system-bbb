@@ -205,11 +205,11 @@ export default function GerenciarParticipantes() {
           {isLoading ? (
             <div className={styles.adminPageLoading}>
               <div className={styles.adminPageLoadingSpinner} />
-              <p>Carregando participantes...</p>
+              <p className={styles.adminPageLoadingText}>Carregando participantes...</p>
             </div>
           ) : (
             <>
-              <div className='flex justify-between items-center p-4'>
+              <div className={styles.adminPageSortContainer}>
                 <div className={styles.adminPageSortButtons}>
                   <button onClick={() => handleSort('name')}>
                     Nome {sortBy === 'name' && (sortOrder === 'asc' ? '↑' : '↓')}
@@ -229,7 +229,7 @@ export default function GerenciarParticipantes() {
                         alt={participant.name}
                         width={40}
                         height={40}
-                        className="object-cover"
+                        className={styles.adminPageParticipantCardImageContent}
                       />
                     </div>
                     <div className={styles.adminPageParticipantCardInfo}>
