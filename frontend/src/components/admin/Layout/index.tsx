@@ -1,16 +1,6 @@
 import { ReactNode } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
-import {
-  Sidebar,
-  SidebarContent,
-  SidebarHeader,
-  SidebarMenu,
-  SidebarMenuItem,
-  SidebarMenuButton,
-  SidebarProvider,
-} from '@/components/ui/sidebar';
-import { LayoutDashboard, Users, Vote, Settings } from 'lucide-react';
 import styles from './styles.module.scss';
 
 interface AdminLayoutProps {
@@ -19,57 +9,50 @@ interface AdminLayoutProps {
 
 export default function AdminLayout({ children }: AdminLayoutProps) {
   const router = useRouter();
-  const currentPath = router.pathname;
 
-  const menuItems = [
-    { path: '/admin', label: 'Dashboard', icon: LayoutDashboard },
-    { path: '/admin/participantes', label: 'Participantes', icon: Users },
-    { path: '/admin/votacoes', label: 'Votações', icon: Vote },
-    { path: '/admin/configuracoes', label: 'Configurações', icon: Settings },
-  ];
+  const isActive = (path: string) => {
+    return router.pathname === path;
+  };
 
   return (
-    <SidebarProvider defaultOpen>
-      <div className={styles.adminLayout}>
-        <Sidebar>
-          <SidebarHeader className={styles.adminLayoutHeader}>
-            <h1 className={styles.adminLayoutTitle}>BBB 25</h1>
-            <p className={styles.adminLayoutSubtitle}>Painel Administrativo</p>
-          </SidebarHeader>
+    <div className={styles.adminLayout}>
+      <nav className={styles.adminNav}>
+        <div className={styles.adminNavHeader}>
+          <h1>BBB 25</h1>
+          <p>Painel Administrativo</p>
+        </div>
 
-          <SidebarContent>
-            <SidebarMenu className={styles.adminLayoutMenu}>
-              {menuItems.map((item) => {
-                const Icon = item.icon;
-                return (
-                  <SidebarMenuItem key={item.path}>
-                    <SidebarMenuButton
-                      asChild
-                      isActive={currentPath === item.path}
-                      tooltip={item.label}
-                    >
-                      <Link
-                        href={item.path}
-                        className={`${styles.adminLayoutMenuItem} ${currentPath === item.path ? styles.adminLayoutMenuItemActive : ''
-                          }`}
-                      >
-                        <Icon className={styles.adminLayoutMenuIcon} />
-                        <span>{item.label}</span>
-                      </Link>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                );
-              })}
-            </SidebarMenu>
-          </SidebarContent>
-        </Sidebar>
+        <div className={styles.adminNavLinks}>
+          <Link
+            href="/admin"
+            className={`${styles.adminNavLink} ${isActive('/admin') ? styles.adminNavLinkActive : ''}`}
+          >
+            Dashboard
+          </Link>
+          <Link
+            href="/admin/participantes"
+            className={`${styles.adminNavLink} ${isActive('/admin/participantes') ? styles.adminNavLinkActive : ''}`}
+          >
+            Participantes
+          </Link>
+          <Link
+            href="/admin/votacoes"
+            className={`${styles.adminNavLink} ${isActive('/admin/votacoes') ? styles.adminNavLinkActive : ''}`}
+          >
+            Votações
+          </Link>
+          <Link
+            href="/admin/configuracoes"
+            className={`${styles.adminNavLink} ${isActive('/admin/configuracoes') ? styles.adminNavLinkActive : ''}`}
+          >
+            Configurações
+          </Link>
+        </div>
+      </nav>
 
-        <main className={styles.adminLayoutMain}>
-          <div className={styles.adminLayoutContent}>
-            {children}
-          </div>
-        </main>
-      </div>
-    </SidebarProvider>
+      <main className={styles.adminMain}>
+        {children}
+      </main>
+    </div>
   );
 } 

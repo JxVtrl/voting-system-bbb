@@ -5,6 +5,7 @@ import ParticipantSelectionModal from '@/components/participants/SelectionModal'
 import { Participant, VotingStatus } from '@/types';
 import { api } from '@/services/api';
 import AdminLayout from '@/components/admin/Layout';
+import styles from '@/styles/admin.module.scss';
 
 interface ParticipantResponse {
   id: string;
@@ -83,20 +84,21 @@ export default function Admin() {
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
-      <div className="space-y-6">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
-          <p className="text-sm text-gray-500 mt-1">Gerencie as votações do BBB 25</p>
+      <div className={styles.adminPageContainer}>
+        <div className={styles.adminPageHeader}>
+          <h1 className={styles.adminPageHeaderTitle}>Dashboard</h1>
+          <p className={styles.adminPageHeaderDescription}>Gerencie as votações do BBB 25</p>
         </div>
 
         {/* Status da Votação */}
-        <div className="bg-white shadow-sm rounded-lg p-6">
-          <div className="flex items-center justify-between">
+        <div className={styles.adminPageCard}>
+          <div className={styles.adminPageCardHeader}>
             <div>
-              <h2 className="text-lg font-medium text-gray-900">Status da Votação</h2>
+              <h2>Status da Votação</h2>
               <div className="mt-2 flex items-center space-x-2">
-                <div className={`w-2 h-2 rounded-full ${votingStatus.isEnabled ? 'bg-green-500' : 'bg-red-500'}`}></div>
-                <span className="text-sm text-gray-600">
+                <span className={`${styles.adminPageStatus} ${
+                  votingStatus.isEnabled ? styles.adminPageStatusSuccess : styles.adminPageStatusDanger
+                }`}>
                   {votingStatus.isEnabled ? 'Votação Ativa' : 'Votação Inativa'}
                 </span>
               </div>
@@ -115,14 +117,14 @@ export default function Admin() {
               <button
                 onClick={() => setIsSelectionModalOpen(true)}
                 disabled={votingStatus.isEnabled}
-                className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                className={`${styles.adminPageButton} ${styles.adminPageButtonPrimary}`}
               >
                 Iniciar Paredão
               </button>
               <button
                 onClick={handleEndVoting}
                 disabled={!votingStatus.isEnabled}
-                className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                className={`${styles.adminPageButton} ${styles.adminPageButtonDanger}`}
               >
                 Encerrar Votação
               </button>
@@ -131,32 +133,33 @@ export default function Admin() {
         </div>
 
         {/* Participantes do Paredão */}
-        <div className="bg-white shadow-sm rounded-lg p-6">
-          <h2 className="text-lg font-medium text-gray-900 mb-4">
-            {votingStatus.isEnabled ? 'Participantes do Paredão Atual' : 'Nenhum Paredão em Andamento'}
-          </h2>
+        <div className={styles.adminPageCard}>
+          <div className={styles.adminPageCardHeader}>
+            <h2>
+              {votingStatus.isEnabled ? 'Participantes do Paredão Atual' : 'Nenhum Paredão em Andamento'}
+            </h2>
+          </div>
+          
           {votingStatus.isEnabled ? (
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className={styles.adminPageCardGrid}>
               {votingStatus.participants.map((participant) => (
                 <div
                   key={participant.id}
-                  className="bg-gray-50 rounded-lg p-4"
+                  className={styles.adminPageParticipantCard}
                 >
-                  <div className="flex items-center space-x-4">
-                    <div className="relative w-16 h-16">
-                      <Image
-                        src={participant.imageUrl}
-                        alt={participant.name}
-                        fill
-                        className="rounded-full object-cover"
-                      />
-                    </div>
-                    <div>
-                      <h3 className="font-medium text-gray-900">{participant.name}</h3>
-                      <p className="text-sm text-gray-600 mt-1">
-                        Votos: {participant.votes?.toLocaleString() || '0'}
-                      </p>
-                    </div>
+                  <div className={styles.adminPageParticipantCardImage}>
+                    <Image
+                      src={participant.imageUrl}
+                      alt={participant.name}
+                      fill
+                      className="object-cover"
+                    />
+                  </div>
+                  <div className={styles.adminPageParticipantCardInfo}>
+                    <h3>{participant.name}</h3>
+                    <p className="text-sm text-gray-600">
+                      Votos: {participant.votes?.toLocaleString() || '0'}
+                    </p>
                   </div>
                 </div>
               ))}

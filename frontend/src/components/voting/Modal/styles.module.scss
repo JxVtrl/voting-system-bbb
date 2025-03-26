@@ -1,59 +1,105 @@
-.paredao-modal {
-  &__overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(0, 0, 0, 0.5);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 1000;
-  }
+.paredaoModal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.75);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 1rem;
+  backdrop-filter: blur(4px);
 
-  &__content {
+  &Content {
     background: white;
-    padding: 24px;
-    border-radius: 8px;
-    width: 90%;
-    max-width: 800px;
+    padding: 2rem;
+    border-radius: 1rem;
+    width: 100%;
+    max-width: 900px;
     max-height: 90vh;
     overflow-y: auto;
     position: relative;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    animation: modalEnter 0.3s ease-out;
+
+    &::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    &::-webkit-scrollbar-track {
+      background: #f1f1f1;
+      border-radius: 4px;
+    }
+
+    &::-webkit-scrollbar-thumb {
+      background: #cbd5e0;
+      border-radius: 4px;
+
+      &:hover {
+        background: #a0aec0;
+      }
+    }
   }
 
-  &__title {
+  &Title {
     color: #1a365d;
-    margin: 0 0 20px 0;
-    font-size: 1.5rem;
+    margin: 0 0 2rem 0;
+    font-size: 1.75rem;
+    font-weight: 700;
+    text-align: center;
   }
 
-  &__grid {
+  &Grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-    gap: 16px;
-    margin-bottom: 24px;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
   }
 
-  &__card {
+  &Card {
     background: white;
     border: 2px solid #e2e8f0;
-    border-radius: 8px;
-    padding: 12px;
+    border-radius: 1rem;
+    padding: 1rem;
     cursor: pointer;
     transition: all 0.2s ease;
     position: relative;
+    overflow: hidden;
 
-    &--selected {
-      background: #e6f0ff;
+    &Selected {
       border-color: #3182ce;
+      background: linear-gradient(45deg, #ebf8ff, #bee3f8);
+
+      .paredaoModalName {
+        color: #2b6cb0;
+      }
+
+      &::before {
+        content: '✓';
+        position: absolute;
+        top: 0.5rem;
+        right: 0.5rem;
+        background: #3182ce;
+        color: white;
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 14px;
+        font-weight: bold;
+      }
     }
 
-    &--leader {
-      opacity: 0.7;
+    &Leader {
+      opacity: 0.75;
       cursor: not-allowed;
+      border-color: #f6ad55;
+      background: #fffaf0;
+
+      .paredaoModalName {
+        color: #c05621;
+      }
 
       &:hover {
         transform: none;
@@ -61,65 +107,95 @@
       }
     }
 
-    &:hover:not(.paredao-modal__card--leader) {
-      transform: translateY(-2px);
-      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    &:hover:not(.paredaoModalCardLeader) {
+      transform: translateY(-4px);
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+      border-color: #90cdf4;
     }
   }
 
-  &__image {
+  &Image {
     width: 100%;
-    height: 200px;
+    aspect-ratio: 1;
     object-fit: cover;
-    border-radius: 4px;
-    margin-bottom: 8px;
+    border-radius: 0.75rem;
+    margin-bottom: 1rem;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
   }
 
-  &__name {
-    font-weight: 500;
+  &Name {
+    font-weight: 600;
     color: #2d3748;
-    margin-bottom: 4px;
+    text-align: center;
+    font-size: 1rem;
+    margin: 0;
   }
 
-  &__leader-badge {
+  &LeaderBadge {
     position: absolute;
-    top: 8px;
-    right: 8px;
-    background: #e53e3e;
+    top: 0.5rem;
+    right: 0.5rem;
+    background: linear-gradient(45deg, #ed8936, #dd6b20);
     color: white;
-    padding: 4px 8px;
-    border-radius: 4px;
-    font-size: 0.8rem;
-    font-weight: 500;
+    padding: 0.25rem 0.75rem;
+    border-radius: 1rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   }
 
-  &__button-group {
+  &ButtonGroup {
     display: flex;
-    gap: 12px;
+    gap: 1rem;
     justify-content: flex-end;
+    margin-top: 2rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid #e2e8f0;
   }
 
-  &__button {
-    background: #3182ce;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    padding: 8px 16px;
-    cursor: pointer;
+  &Button {
+    padding: 0.75rem 1.5rem;
+    border-radius: 0.5rem;
+    font-weight: 600;
     font-size: 0.95rem;
     transition: all 0.2s ease;
+    border: none;
+    cursor: pointer;
 
-    &:hover {
-      opacity: 0.9;
+    &:first-child {
+      background: #e2e8f0;
+      color: #4a5568;
+
+      &:hover {
+        background: #cbd5e0;
+      }
     }
 
-    &:disabled {
-      background: #cbd5e0;
-      cursor: not-allowed;
-    }
+    &:last-child {
+      background: #3182ce;
+      color: white;
 
-    &--secondary {
-      background: #718096;
+      &:hover:not(:disabled) {
+        background: #2c5282;
+        transform: translateY(-1px);
+      }
+
+      &:disabled {
+        background: #cbd5e0;
+        cursor: not-allowed;
+        color: #718096;
+      }
     }
+  }
+}
+
+@keyframes modalEnter {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
   }
 } 

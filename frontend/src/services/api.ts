@@ -52,4 +52,36 @@ export const api = {
     if (!response.ok) throw new Error('Erro ao buscar histórico');
     return response.json();
   },
+
+  async createParticipant(participant: Omit<Participant, 'id'>): Promise<{ success: boolean }> {
+    const response = await fetch(`${API_URL}/participantes`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(participant),
+    });
+    if (!response.ok) throw new Error('Erro ao criar participante');
+    return response.json();
+  },
+
+  async updateParticipant(id: string, participant: Participant): Promise<{ success: boolean }> {
+    const response = await fetch(`${API_URL}/participantes/${id}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(participant),
+    });
+    if (!response.ok) throw new Error('Erro ao atualizar participante');
+    return response.json();
+  },
+
+  async deleteParticipant(id: string): Promise<{ success: boolean }> {
+    const response = await fetch(`${API_URL}/participantes/${id}`, {
+      method: 'DELETE',
+    });
+    if (!response.ok) throw new Error('Erro ao excluir participante');
+    return response.json();
+  },
 }; 

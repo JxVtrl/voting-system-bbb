@@ -1,0 +1,520 @@
+.adminPage {
+  &Container {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 2rem;
+  }
+
+  &Header {
+    margin-bottom: 2rem;
+
+    &Title {
+      font-size: 1.875rem;
+      font-weight: 700;
+      color: #1a365d;
+      margin-bottom: 0.5rem;
+    }
+
+    &Description {
+      color: #64748b;
+      font-size: 0.875rem;
+    }
+  }
+
+  &Card {
+    background: white;
+    border-radius: 1rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+
+    &Header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1.5rem;
+
+      h2 {
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: #1a365d;
+      }
+    }
+
+    &Grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 1.5rem;
+    }
+  }
+
+  &Button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.75rem 1.5rem;
+    border-radius: 0.5rem;
+    font-weight: 600;
+    font-size: 0.875rem;
+    transition: all 0.2s ease;
+    cursor: pointer;
+    border: none;
+
+    &Primary {
+      background: #3182ce;
+      color: white;
+
+      &:hover:not(:disabled) {
+        background: #2c5282;
+        transform: translateY(-1px);
+      }
+
+      &:disabled {
+        opacity: 0.7;
+        cursor: not-allowed;
+      }
+    }
+
+    &Danger {
+      background: #e53e3e;
+      color: white;
+
+      &:hover:not(:disabled) {
+        background: #c53030;
+      }
+    }
+
+    &Secondary {
+      background: #e2e8f0;
+      color: #2d3748;
+
+      &:hover:not(:disabled) {
+        background: #cbd5e0;
+      }
+    }
+  }
+
+  &Status {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+
+    &Success {
+      background: #c6f6d5;
+      color: #22543d;
+    }
+
+    &Warning {
+      background: #feebc8;
+      color: #744210;
+    }
+
+    &Danger {
+      background: #fed7d7;
+      color: #822727;
+    }
+
+    &Info {
+      background: #bee3f8;
+      color: #2a4365;
+    }
+  }
+
+  &ParticipantCard {
+    background: white;
+    border-radius: 0.75rem;
+    padding: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    transition: all 0.2s ease;
+
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    }
+
+    &Image {
+      width: 4rem;
+      height: 4rem;
+      border-radius: 50%;
+      overflow: hidden;
+      position: relative;
+
+      img {
+        object-fit: cover;
+      }
+    }
+
+    &Info {
+      flex: 1;
+
+      h3 {
+        font-weight: 600;
+        color: #2d3748;
+        margin-bottom: 0.25rem;
+      }
+    }
+
+    &Actions {
+      display: flex;
+      gap: 0.5rem;
+    }
+  }
+
+  &Loading {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 200px;
+
+    &Spinner {
+      width: 3rem;
+      height: 3rem;
+      border: 3px solid #e2e8f0;
+      border-top-color: #3182ce;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+  }
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.adminPageContainer {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+.adminPageHeader {
+  margin-bottom: 2rem;
+
+  .adminPageHeaderTitle {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #1a1a1a;
+  }
+
+  .adminPageHeaderDescription {
+    font-size: 0.875rem;
+    color: #4a5568;
+    margin-top: 0.5rem;
+  }
+}
+
+.adminPageCard {
+  background-color: #fff;
+  border-radius: 0.5rem;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+  overflow: hidden;
+}
+
+.adminPageCardHeader {
+  padding: 1.5rem;
+  border-bottom: 1px solid #e2e8f0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  h2 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #1a1a1a;
+  }
+}
+
+.adminPageCardContent {
+  padding: 1.5rem;
+}
+
+.adminPageCardGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1.5rem;
+  padding: 1.5rem;
+}
+
+.adminPageLoading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem;
+  gap: 1rem;
+  color: #4a5568;
+
+  .adminPageLoadingSpinner {
+    width: 2.5rem;
+    height: 2.5rem;
+    border: 3px solid #e2e8f0;
+    border-top-color: #3182ce;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+  }
+}
+
+.adminPageButton {
+  padding: 0.5rem 1rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  border-radius: 0.375rem;
+  transition: all 0.2s ease;
+
+  &:focus {
+    outline: none;
+  }
+
+  &.adminPageButtonPrimary {
+    background-color: #3182ce;
+    color: #fff;
+    border: 1px solid transparent;
+
+    &:hover {
+      background-color: #2c5282;
+    }
+
+    &:focus {
+      box-shadow: 0 0 0 3px rgba(49, 130, 206, 0.1);
+    }
+
+    &:disabled {
+      background-color: #a0aec0;
+      cursor: not-allowed;
+    }
+  }
+
+  &.adminPageButtonSecondary {
+    background-color: #fff;
+    color: #4a5568;
+    border: 1px solid #e2e8f0;
+
+    &:hover {
+      background-color: #f7fafc;
+    }
+
+    &:focus {
+      box-shadow: 0 0 0 3px rgba(74, 85, 104, 0.1);
+    }
+  }
+
+  &.adminPageButtonDanger {
+    background-color: #e53e3e;
+    color: #fff;
+    border: 1px solid transparent;
+
+    &:hover {
+      background-color: #c53030;
+    }
+
+    &:focus {
+      box-shadow: 0 0 0 3px rgba(229, 62, 62, 0.1);
+    }
+  }
+
+  &.adminPageButtonWarning {
+    background-color: #ed8936;
+    color: #fff;
+    border: 1px solid transparent;
+
+    &:hover {
+      background-color: #dd6b20;
+    }
+
+    &:focus {
+      box-shadow: 0 0 0 3px rgba(237, 137, 54, 0.1);
+    }
+  }
+
+  &.adminPageButtonSuccess {
+    background-color: #48bb78;
+    color: #fff;
+    border: 1px solid transparent;
+
+    &:hover {
+      background-color: #38a169;
+    }
+
+    &:focus {
+      box-shadow: 0 0 0 3px rgba(72, 187, 120, 0.1);
+    }
+  }
+}
+
+.adminPageStatus {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.25rem 0.75rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  border-radius: 9999px;
+
+  &.adminPageStatusSuccess {
+    background-color: #c6f6d5;
+    color: #2f855a;
+  }
+
+  &.adminPageStatusWarning {
+    background-color: #feebc8;
+    color: #c05621;
+  }
+
+  &.adminPageStatusDanger {
+    background-color: #fed7d7;
+    color: #c53030;
+  }
+
+  &.adminPageStatusInfo {
+    background-color: #bee3f8;
+    color: #2c5282;
+  }
+}
+
+.adminPageParticipantCard {
+  background-color: #fff;
+  border-radius: 0.5rem;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+  overflow: hidden;
+  transition: all 0.2s ease;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  }
+}
+
+.adminPageParticipantCardImage {
+  position: relative;
+  width: 100%;
+  padding-bottom: 100%;
+  overflow: hidden;
+
+  img {
+    object-fit: cover;
+    transition: transform 0.2s ease;
+  }
+
+  &:hover img {
+    transform: scale(1.05);
+  }
+}
+
+.adminPageParticipantCardInfo {
+  padding: 1rem;
+
+  h3 {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #1a1a1a;
+    margin-bottom: 0.5rem;
+  }
+}
+
+.adminPageParticipantCardActions {
+  padding: 1rem;
+  border-top: 1px solid #e2e8f0;
+  display: flex;
+  gap: 0.5rem;
+  justify-content: flex-end;
+}
+
+.adminPageVotingCard {
+  background-color: #fff;
+  border-radius: 0.5rem;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+  overflow: hidden;
+}
+
+.adminPageVotingCardHeader {
+  padding: 1rem;
+  border-bottom: 1px solid #e2e8f0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  h3 {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: #1a1a1a;
+  }
+}
+
+.adminPageVotingCardDate {
+  font-size: 0.875rem;
+  color: #4a5568;
+}
+
+.adminPageVotingCardParticipants {
+  padding: 1rem;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+}
+
+.adminPageVotingCardParticipant {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.75rem;
+  border-radius: 0.375rem;
+  background-color: #f7fafc;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background-color: #edf2f7;
+  }
+
+  &.adminPageVotingCardWinner {
+    background-color: #fed7d7;
+
+    &:hover {
+      background-color: #feb2b2;
+    }
+  }
+}
+
+.adminPageVotingCardParticipantImage {
+  position: relative;
+  width: 3rem;
+  height: 3rem;
+  border-radius: 9999px;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.adminPageVotingCardParticipantInfo {
+  flex: 1;
+
+  h4 {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #1a1a1a;
+    margin-bottom: 0.25rem;
+  }
+
+  p {
+    font-size: 0.75rem;
+    color: #4a5568;
+  }
+}
+
+.adminPageVotingCardFooter {
+  padding: 1rem;
+  border-top: 1px solid #e2e8f0;
+  text-align: right;
+  font-size: 0.875rem;
+  color: #4a5568;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+} 

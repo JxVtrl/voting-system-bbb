@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Participant } from '@/types';
 import { api } from '@/services/api';
 import styles from './styles.module.scss';
+import Image from 'next/image';
 
 interface ParedaoModalProps {
   onClose: () => void;
@@ -49,58 +50,56 @@ export function ParedaoModal({ onClose, onConfirm }: ParedaoModalProps) {
     }
   };
 
-  if (loading) {
-    return (
-      <div className={styles.paredaoModal} onClick={onClose}>
-        <div className={styles.paredaoModalContent} onClick={e => e.stopPropagation()}>
-          <h2 className={styles.paredaoModalTitle}>Carregando participantes...</h2>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className={styles.paredaoModal} onClick={onClose}>
       <div className={styles.paredaoModalContent} onClick={e => e.stopPropagation()}>
-        <h2 className={styles.paredaoModalTitle}>Selecione os Participantes para o Paredão</h2>
+        <h2 className={styles.paredaoModalTitle}>
+          {loading ? 'Carregando participantes...' : 'Selecione os Participantes para o Paredão'}
+        </h2>
         
-        <div className={styles.paredaoModalGrid}>
-          {participants.map(participant => (
-            <div
-              key={participant.id}
-              className={`${styles.paredaoModalCard} ${
-                selectedIds.includes(participant.id) ? styles.paredaoModalCardSelected : ''
-              } ${participant.status === 'líder' ? styles.paredaoModalCardLeader : ''}`}
-              onClick={() => handleParticipantClick(participant)}
-            >
-              <img
-                src={participant.imageUrl}
-                alt={participant.name}
-                className={styles.paredaoModalImage}
-              />
-              <div className={styles.paredaoModalName}>{participant.name}</div>
-              {participant.status === 'líder' && (
-                <div className={styles.paredaoModalLeaderBadge}>Líder</div>
-              )}
+        {!loading && (
+          <>
+            <div className={styles.paredaoModalGrid}>
+              {participants.map(participant => (
+                <div
+                  key={participant.id}
+                  className={`${styles.paredaoModalCard} ${
+                    selectedIds.includes(participant.id) ? styles.paredaoModalCardSelected : ''
+                  } ${participant.status === 'líder' ? styles.paredaoModalCardLeader : ''}`}
+                  onClick={() => handleParticipantClick(participant)}
+                >
+                  <Image
+                    src={participant.imageUrl}
+                    alt={participant.name}
+                    width={200}
+                    height={200}
+                    className={styles.paredaoModalImage}
+                  />
+                  <div className={styles.paredaoModalName}>{participant.name}</div>
+                  {participant.status === 'líder' && (
+                    <div className={styles.paredaoModalLeaderBadge}>Líder</div>
+                  )}
+                </div>
+              ))}
             </div>
-          ))}
-        </div>
 
-        <div className={styles.paredaoModalButtonGroup}>
-          <button
-            className={styles.paredaoModalButton}
-            onClick={onClose}
-          >
-            Cancelar
-          </button>
-          <button
-            className={styles.paredaoModalButton}
-            onClick={handleConfirm}
-            disabled={selectedIds.length < 2}
-          >
-            Confirmar ({selectedIds.length} selecionados)
-          </button>
-        </div>
+            <div className={styles.paredaoModalButtonGroup}>
+              <button
+                className={styles.paredaoModalButton}
+                onClick={onClose}
+              >
+                Cancelar
+              </button>
+              <button
+                className={styles.paredaoModalButton}
+                onClick={handleConfirm}
+                disabled={selectedIds.length < 2}
+              >
+                Confirmar ({selectedIds.length} selecionados)
+              </button>
+            </div>
+          </>
+        )}
       </div>
     </div>
   );
