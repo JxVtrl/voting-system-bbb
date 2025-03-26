@@ -19,7 +19,6 @@ export default function GerenciarParticipantes() {
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
   const [statusFilter, setStatusFilter] = useState<'todos' | 'ativo' | 'inativo' | 'lider' | 'eliminado'>('todos');
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);
-  const [menuPosition, setMenuPosition] = useState({ top: 0, left: 0 });
   const actionButtonRefs = useRef<{ [key: string]: HTMLButtonElement | null }>({});
 
   const loadParticipants = async () => {
@@ -138,20 +137,10 @@ export default function GerenciarParticipantes() {
 
   const handleMenuClick = (participantId: string, event: React.MouseEvent<HTMLButtonElement>) => {
     event.stopPropagation();
+    event.preventDefault();
 
-    if (openMenuId === participantId) {
-      setOpenMenuId(null);
-    } else {
-      const buttonRect = event.currentTarget.getBoundingClientRect();
-      const scrollY = window.scrollY;
-      const scrollX = window.scrollX;
-
-      setMenuPosition({
-        top: buttonRect.bottom + scrollY,
-        left: Math.max(0, buttonRect.right + scrollX - 160) // 160px é a largura do menu
-      });
-      setOpenMenuId(participantId);
-    }
+    // Toggle menu
+    setOpenMenuId(openMenuId === participantId ? null : participantId);
   };
 
   // Função para fechar o menu quando clicar fora dele
@@ -278,15 +267,7 @@ export default function GerenciarParticipantes() {
                         </svg>
                       </button>
                       {openMenuId === participant.id && (
-                        <div
-                          className={styles.adminPageActionMenu}
-                          style={{
-                            position: 'fixed',
-                            top: `${menuPosition.top}px`,
-                            left: `${menuPosition.left}px`,
-                            zIndex: 99999
-                          }}
-                        >
+                        <div className={styles.adminPageActionMenu}>
                           <button onClick={() => {
                             handleEdit(participant);
                             setOpenMenuId(null);

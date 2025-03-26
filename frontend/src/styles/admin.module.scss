@@ -191,18 +191,12 @@
     background-color: white;
     border-radius: 0.5rem;
     box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-    overflow: hidden;
-    transition: all 0.2s;
+    overflow: visible;
     display: flex;
     align-items: center;
     padding: 0.75rem;
     gap: 0.75rem;
     position: relative;
-
-    &:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-    }
   }
 
   &ActionButton {
@@ -477,24 +471,6 @@
   margin: 0 auto;
 }
 
-.adminPageParticipantCard {
-  background-color: white;
-  border-radius: 0.5rem;
-  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-  overflow: visible;
-  transition: all 0.2s;
-  display: flex;
-  align-items: center;
-  padding: 0.75rem;
-  gap: 0.75rem;
-  position: relative;
-
-  &:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-  }
-}
-
 .adminPageParticipantCardImage {
   position: relative;
   width: 2.5rem;
@@ -538,34 +514,58 @@
 }
 
 .adminPageActionButton {
-  padding: 0.375rem;
+  padding: 0.5rem;
   border-radius: 0.375rem;
   background: transparent;
   border: none;
   cursor: pointer;
   color: #4a5568;
-  transition: all 0.2s;
+  transition: all 0.15s ease;
   display: flex;
   align-items: center;
   justify-content: center;
 
   &:hover {
-    background-color: #f7fafc;
+    background-color: #f3f4f6;
     color: #1a1a1a;
   }
 
+  &:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px #e2e8f0;
+  }
+
   svg {
-    width: 1rem;
-    height: 1rem;
+    width: 1.25rem;
+    height: 1.25rem;
   }
 }
 
 .adminPageActionMenu {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 0.5rem);
   background: white;
-  border-radius: 0.375rem;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-  min-width: 160px;
+  border-radius: 0.5rem;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  min-width: 180px;
   border: 1px solid #e2e8f0;
+  z-index: 50;
+  overflow: hidden;
+  
+  &::before {
+    content: '';
+    position: absolute;
+    top: -0.5rem;
+    right: 0.75rem;
+    width: 1rem;
+    height: 1rem;
+    background: white;
+    transform: rotate(45deg);
+    border-left: 1px solid #e2e8f0;
+    border-top: 1px solid #e2e8f0;
+    z-index: -1;
+  }
   
   button {
     width: 100%;
@@ -578,8 +578,8 @@
     cursor: pointer;
     display: flex;
     align-items: center;
-    gap: 0.5rem;
-    transition: all 0.2s;
+    gap: 0.625rem;
+    transition: all 0.15s ease;
     border-bottom: 1px solid #f0f0f0;
     
     &:last-child {
@@ -587,8 +587,18 @@
     }
     
     &:hover {
-      background-color: #f7fafc;
-      color: #1a1a1a;
+      background-color: #f8fafc;
+    }
+
+    &:focus {
+      outline: none;
+      background-color: #f1f5f9;
+    }
+
+    svg {
+      width: 1rem;
+      height: 1rem;
+      flex-shrink: 0;
     }
   }
 }
@@ -598,6 +608,11 @@
   
   &:hover {
     background-color: #fffaf0 !important;
+    color: #c05621 !important;
+  }
+
+  svg {
+    stroke: currentColor;
   }
 }
 
@@ -606,6 +621,11 @@
   
   &:hover {
     background-color: #fff5f5 !important;
+    color: #c53030 !important;
+  }
+
+  svg {
+    stroke: currentColor;
   }
 }
 
