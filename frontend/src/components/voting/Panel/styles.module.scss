@@ -1,52 +1,58 @@
 .votingPanel {
-    background: white;
-    border-radius: 1rem;
-    padding: 2rem;
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-    max-width: 1200px;
+    max-width: 1400px;
     margin: 0 auto;
+    padding: 2rem 1rem;
+    width: 100%;
     
     &Title {
         text-align: center;
-        font-size: 2rem;
-        font-weight: 700;
-        color: #1a1a1a;
-        margin-bottom: 2rem;
+        font-size: 2.5rem;
+        font-weight: 800;
+        background: linear-gradient(135deg, #1a1a1a 0%, #404040 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        margin-bottom: 3rem;
+        letter-spacing: -0.02em;
     }
 
     &Grid {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-        gap: 2rem;
-        margin-bottom: 2rem;
+        grid-template-columns: repeat(auto-fit, 200px);
+        gap: 1.5rem;
+        margin-bottom: 3rem;
+        padding: 0 1rem;
+        justify-content: center;
     }
 
     &Card {
         position: relative;
-        background: #f8f9fa;
         border-radius: 0.75rem;
-        padding: 1rem;
         cursor: pointer;
-        transition: all 0.2s ease-in-out;
-        border: 2px solid transparent;
-        overflow: visible;
-
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        background: transparent;
+        
         &:hover:not(&Disabled) {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            transform: translateY(-4px);
+
+            .votingPanelCardImage {
+                box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1),
+                           0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            }
         }
 
         &Selected {
-            border-color: #0070f3;
-            background: #f0f7ff;
+            .votingPanelCardImage {
+                border: 3px solid #0070f3;
+                box-shadow: 0 0 0 4px rgba(0, 112, 243, 0.2);
+            }
 
-            &:hover {
-                border-color: #0070f3;
+            .votingPanelName {
+                color: #0070f3;
             }
         }
 
         &Disabled {
-            opacity: 0.7;
+            opacity: 0.6;
             cursor: not-allowed;
         }
 
@@ -54,70 +60,84 @@
             position: relative;
             width: 100%;
             padding-bottom: 100%;
-            margin-bottom: 1rem;
-            border-radius: 0.5rem;
+            border-radius: 0.75rem;
             overflow: hidden;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 3px solid transparent;
+            background: #fff;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1),
+                       0 4px 6px -2px rgba(0, 0, 0, 0.05);
         }
     }
 
     &Image {
         object-fit: cover;
-        transition: transform 0.2s ease-in-out;
+        transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
 
         .votingPanelCard:hover:not(.votingPanelCardDisabled) & {
-            transform: scale(1.05);
+            transform: scale(1.08);
         }
     }
 
     &Name {
         font-size: 1.25rem;
-        font-weight: 600;
+        font-weight: 700;
         color: #1a1a1a;
         text-align: center;
-        margin: 0.5rem 0;
+        margin: 1rem 0 0.5rem;
+        transition: color 0.3s ease;
     }
 
     &Votes {
         text-align: center;
         color: #666;
         font-size: 0.875rem;
+        font-weight: 500;
     }
 
     &Button {
         display: block;
         width: 100%;
-        max-width: 300px;
-        margin: 2rem auto;
-        padding: 1rem 2rem;
-        font-size: 1.125rem;
+        max-width: 320px;
+        margin: 3rem auto;
+        padding: 1.25rem 2.5rem;
+        font-size: 1.25rem;
         font-weight: 600;
         color: white;
-        background: linear-gradient(to right, #0070f3, #00a6ed);
+        background: linear-gradient(135deg, #0070f3 0%, #00a6ed 100%);
         border: none;
-        border-radius: 0.5rem;
+        border-radius: 1rem;
         cursor: pointer;
-        transition: all 0.2s ease-in-out;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: 0 4px 6px -1px rgba(0, 112, 243, 0.2),
+                   0 2px 4px -1px rgba(0, 112, 243, 0.1);
 
         &:hover:not(&Disabled) {
-            transform: translateY(-1px);
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            transform: translateY(-2px);
+            box-shadow: 0 20px 25px -5px rgba(0, 112, 243, 0.2),
+                       0 10px 10px -5px rgba(0, 112, 243, 0.1);
         }
 
         &:active:not(&Disabled) {
             transform: translateY(0);
+            box-shadow: 0 4px 6px -1px rgba(0, 112, 243, 0.2);
         }
 
         &Disabled {
-            opacity: 0.7;
+            background: linear-gradient(135deg, #a0aec0 0%, #cbd5e0 100%);
             cursor: not-allowed;
-            background: #ccc;
+            box-shadow: none;
         }
 
         &Loading {
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 0.5rem;
+            gap: 0.75rem;
+
+            span {
+                font-size: 1.125rem;
+            }
         }
     }
 
@@ -136,11 +156,13 @@
     &Status {
         text-align: center;
         color: #666;
-        font-size: 1rem;
-        margin-top: 1rem;
-        padding: 1rem;
-        background: #f8f9fa;
-        border-radius: 0.5rem;
+        font-size: 1.125rem;
+        font-weight: 500;
+        margin-top: 2rem;
+        padding: 1.5rem;
+        background: linear-gradient(135deg, rgba(0, 0, 0, 0.02) 0%, rgba(0, 0, 0, 0.05) 100%);
+        border-radius: 1rem;
+        backdrop-filter: blur(10px);
     }
 }
 
@@ -165,21 +187,43 @@
     }
 }
 
+@media (max-width: 1200px) {
+    .votingPanel {
+        &Grid {
+            grid-template-columns: repeat(auto-fit, 180px);
+            gap: 1.25rem;
+        }
+    }
+}
+
 @media (max-width: 768px) {
     .votingPanel {
-        padding: 1rem;
+        padding: 1.5rem 0.5rem;
 
         &Title {
-            font-size: 1.5rem;
+            font-size: 2rem;
+            margin-bottom: 2rem;
         }
 
         &Grid {
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            grid-template-columns: repeat(auto-fit, 150px);
             gap: 1rem;
+            padding: 0 0.5rem;
         }
 
         &Name {
             font-size: 1rem;
+            margin: 0.75rem 0 0.25rem;
+        }
+
+        &Button {
+            padding: 1rem 2rem;
+            font-size: 1.125rem;
+            margin: 2rem auto;
+        }
+
+        &Votes {
+            font-size: 0.75rem;
         }
     }
 } 
