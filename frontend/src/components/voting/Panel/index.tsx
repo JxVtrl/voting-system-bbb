@@ -5,17 +5,25 @@ import styles from './styles.module.scss';
 
 interface VotingPanelProps {
     participants: Participant[];
-    onVote: (participantId: string) => void;
+    onVote: (participantId: number) => Promise<void>;
     isVotingEnabled: boolean;
 }
 
 export function VotingPanel({ participants = [], onVote, isVotingEnabled }: VotingPanelProps) {
-    const [selectedParticipant, setSelectedParticipant] = useState<string | null>(null);
+    const [selectedParticipant, setSelectedParticipant] = useState<number | null>(null);
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
-    const handleVote = () => {
-        if (selectedParticipant) {
-            onVote(selectedParticipant);
-            setSelectedParticipant(null);
+    const handleVote = async () => {
+        if (selectedParticipant && !isSubmitting) {
+            try {
+                setIsSubmitting(true);
+                await onVote(selectedParticipant);
+                setSelectedParticipant(null);
+            } catch (error) {
+                console.error('Erro ao votar:', error);
+            } finally {
+                setIsSubmitting(false);
+            }
         }
     };
 
@@ -34,36 +42,63 @@ export function VotingPanel({ participants = [], onVote, isVotingEnabled }: Voti
                 {participants.map((participant) => (
                     <div
                         key={participant.id}
-                        className={`${styles.votingPanelCard} ${selectedParticipant === participant.id ? styles.votingPanelCardSelected : ''
-                            }`}
-                        onClick={() => isVotingEnabled && setSelectedParticipant(participant.id)}
+                        className={`${styles.votingPanelCard} ${
+                            selectedParticipant === participant.id ? styles.votingPanelCardSelected : ''
+                        } ${!isVotingEnabled || isSubmitting ? styles.votingPanelCardDisabled : ''}`}
+                        onClick={() => {
+                            if (isVotingEnabled && !isSubmitting) {
+                                setSelectedParticipant(participant.id);
+                            }
+                        }}
+                        role="button"
+                        tabIndex={isVotingEnabled && !isSubmitting ? 0 : -1}
+                        aria-selected={selectedParticipant === participant.id}
+                        aria-disabled={!isVotingEnabled || isSubmitting}
                     >
-                        <Image
-                            src={participant.imageUrl}
-                            alt={participant.name}
-                            width={150}
-                            height={150}
-                            priority
-                            className={styles.votingPanelImage}
-                        />
+                        <div className={styles.votingPanelCardImage}>
+                            <Image
+                                src={participant.imageUrl}
+                                alt={participant.name}
+                                fill
+                                sizes="(max-width: 768px) 100vw, 33vw"
+                                priority
+                                className={styles.votingPanelImage}
+                            />
+                        </div>
                         <h3 className={styles.votingPanelName}>{participant.name}</h3>
                         {participant.votes !== undefined && (
-                            <div className={styles.votingPanelVotes}>{participant.votes} votos</div>
+                            <div className={styles.votingPanelVotes}>
+                                {participant.votes.toLocaleString()} voto{participant.votes !== 1 ? 's' : ''}
+                            </div>
                         )}
                     </div>
                 ))}
             </div>
 
             <button
-                className={styles.votingPanelVoteButton}
+                className={`${styles.votingPanelButton} ${
+                    !isVotingEnabled || !selectedParticipant || isSubmitting
+                        ? styles.votingPanelButtonDisabled
+                        : ''
+                }`}
                 onClick={handleVote}
-                disabled={!isVotingEnabled || !selectedParticipant}
+                disabled={!isVotingEnabled || !selectedParticipant || isSubmitting}
+                aria-busy={isSubmitting}
             >
-                Votar para Eliminar
+                {isSubmitting ? (
+                    <div className={styles.votingPanelButtonLoading}>
+                        <svg className={styles.votingPanelSpinner} viewBox="0 0 24 24">
+                            <circle cx="12" cy="12" r="10" fill="none" strokeWidth="4" />
+                        </svg>
+                        <span>Votando...</span>
+                    </div>
+                ) : (
+                    'Votar para Eliminar'
+                )}
             </button>
 
             {!isVotingEnabled && (
-                <div className={styles.votingPanelStatus}>
+                <div className={styles.votingPanelStatus} role="alert">
                     Votação encerrada. Aguarde o resultado!
                 </div>
             )}
