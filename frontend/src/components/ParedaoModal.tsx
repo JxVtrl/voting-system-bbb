@@ -74,20 +74,34 @@ const ParticipantGrid = styled.div`
   }
 `;
 
-const ParticipantCard = styled.div<{ $selected?: boolean }>`
+const ParticipantCard = styled.div<{ $selected?: boolean; $isLeader?: boolean }>`
   border: 2px solid ${props => props.$selected ? '#3182ce' : '#e2e8f0'};
   border-radius: 8px;
   padding: 8px;
-  cursor: pointer;
+  cursor: ${props => props.$isLeader ? 'not-allowed' : 'pointer'};
   transition: all 0.2s ease;
   background: ${props => props.$selected ? '#ebf8ff' : 'white'};
   position: relative;
   overflow: hidden;
+  opacity: ${props => props.$isLeader ? 0.6 : 1};
 
   &:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    transform: ${props => props.$isLeader ? 'none' : 'translateY(-2px)'};
+    box-shadow: ${props => props.$isLeader ? 'none' : '0 4px 8px rgba(0,0,0,0.1)'};
   }
+`;
+
+const LeaderBadge = styled.div`
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: #e53e3e;
+  color: white;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  z-index: 1;
 `;
 
 const ParticipantImage = styled.img`
@@ -108,13 +122,6 @@ const ParticipantName = styled.div`
   font-weight: 600;
   color: #2d3748;
   font-size: 0.9rem;
-  margin-bottom: 2px;
-`;
-
-const ParticipantStatus = styled.div`
-  text-align: center;
-  color: #718096;
-  font-size: 0.8rem;
 `;
 
 const Footer = styled.div`
@@ -170,7 +177,9 @@ export function ParedaoModal({ participants, onClose, onConfirm }: ParedaoModalP
   
   const activeParticipants = participants.filter(p => p.isActive);
 
-  const handleParticipantClick = (participantId: string) => {
+  const handleParticipantClick = (participantId: string, isLeader: boolean) => {
+    if (isLeader) return;
+    
     setSelectedParticipants(prev => {
       if (prev.includes(participantId)) {
         return prev.filter(id => id !== participantId);
@@ -191,21 +200,25 @@ export function ParedaoModal({ participants, onClose, onConfirm }: ParedaoModalP
       <ModalContent onClick={e => e.stopPropagation()}>
         <Header>
           <Title>Selecione os Participantes</Title>
-          <Subtitle>Escolha os participantes que ainda estão no jogo</Subtitle>
+          <Subtitle>Escolha os participantes para o paredão</Subtitle>
         </Header>
 
         <ParticipantGrid>
-          {activeParticipants.map(participant => (
-            <ParticipantCard
-              key={participant.id}
-              $selected={selectedParticipants.includes(participant.id)}
-              onClick={() => handleParticipantClick(participant.id)}
-            >
-              <ParticipantImage src={participant.imageUrl} alt={participant.name} />
-              <ParticipantName>{participant.name}</ParticipantName>
-              <ParticipantStatus>No jogo</ParticipantStatus>
-            </ParticipantCard>
-          ))}
+          {activeParticipants.map(participant => {
+            const isLeader = participant.status === 'líder';
+            return (
+              <ParticipantCard
+                key={participant.id}
+                $selected={selectedParticipants.includes(participant.id)}
+                $isLeader={isLeader}
+                onClick={() => handleParticipantClick(participant.id, isLeader)}
+              >
+                {isLeader && <LeaderBadge>Líder</LeaderBadge>}
+                <ParticipantImage src={participant.imageUrl} alt={participant.name} />
+                <ParticipantName>{participant.name}</ParticipantName>
+              </ParticipantCard>
+            );
+          })}
         </ParticipantGrid>
 
         <Footer>
