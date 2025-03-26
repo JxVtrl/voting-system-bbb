@@ -7,7 +7,7 @@ interface ParticipantSelectionModalProps {
     isOpen: boolean;
     onClose: () => void;
     participants: Participant[];
-    onStartVoting: (selectedIds: string[]) => void;
+    onStartVoting: (selectedIds: number[]) => void;
 }
 
 export default function ParticipantSelectionModal({
@@ -16,7 +16,7 @@ export default function ParticipantSelectionModal({
     participants,
     onStartVoting,
 }: ParticipantSelectionModalProps) {
-    const [selectedParticipants, setSelectedParticipants] = useState<string[]>([]);
+    const [selectedParticipants, setSelectedParticipants] = useState<number[]>([]);
     const MIN_PARTICIPANTS = 2;
 
     // Reset estado quando o modal for fechado
@@ -30,10 +30,11 @@ export default function ParticipantSelectionModal({
         if (participant.status === 'líder') return;
         
         setSelectedParticipants(prev => {
-            if (prev.includes(participant.id)) {
-                return prev.filter(id => id !== participant.id);
+            const id = participant.id;
+            if (prev.includes(id)) {
+                return prev.filter(prevId => prevId !== id);
             }
-            return [...prev, participant.id];
+            return [...prev, id];
         });
     };
 

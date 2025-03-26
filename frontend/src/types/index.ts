@@ -1,5 +1,5 @@
 export interface Participant {
-  id: string;
+  id: number;
   name: string;
   imageUrl: string;
   status?: 'eliminado' | 'líder' | 'normal';

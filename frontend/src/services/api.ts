@@ -3,7 +3,7 @@ import { Participant, VotingStatus, VotingHistory } from '@/types';
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080';
 
 export const api = {
-  async getParticipants(): Promise<Record<string, Participant>> {
+  async getParticipants(): Promise<Record<number, Participant>> {
     const response = await fetch(`${API_URL}/participantes`);
     if (!response.ok) throw new Error('Erro ao buscar participantes');
     return response.json();
@@ -15,7 +15,7 @@ export const api = {
     return response.json();
   },
 
-  async vote(participantId: string): Promise<{ success: boolean }> {
+  async vote(participantId: number): Promise<{ success: boolean }> {
     const response = await fetch(`${API_URL}/votar`, {
       method: 'POST',
       headers: {
@@ -27,13 +27,13 @@ export const api = {
     return response.json();
   },
 
-  async startVoting(participantIds: string[]): Promise<{ success: boolean }> {
+  async startVoting(participantIds: number[]): Promise<{ success: boolean }> {
     const response = await fetch(`${API_URL}/iniciar-votacao`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ participantes: participantIds }),
+      body: JSON.stringify({ participantIds }),
     });
     if (!response.ok) throw new Error('Erro ao iniciar votação');
     return response.json();
@@ -65,7 +65,7 @@ export const api = {
     return response.json();
   },
 
-  async updateParticipant(id: string, participant: Participant): Promise<{ success: boolean }> {
+  async updateParticipant(id: number, participant: Participant): Promise<{ success: boolean }> {
     const response = await fetch(`${API_URL}/participantes/${id}`, {
       method: 'PUT',
       headers: {
@@ -77,7 +77,7 @@ export const api = {
     return response.json();
   },
 
-  async deleteParticipant(id: string): Promise<{ success: boolean }> {
+  async deleteParticipant(id: number): Promise<{ success: boolean }> {
     const response = await fetch(`${API_URL}/participantes/${id}`, {
       method: 'DELETE',
     });

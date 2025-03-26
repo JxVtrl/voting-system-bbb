@@ -18,8 +18,8 @@ export default function GerenciarParticipantes() {
   const [sortBy, setSortBy] = useState<'name' | 'status' | 'votes'>('name');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
   const [statusFilter, setStatusFilter] = useState<'todos' | 'ativo' | 'inativo' | 'lider' | 'eliminado'>('todos');
-  const [openMenuId, setOpenMenuId] = useState<string | null>(null);
-  const actionButtonRefs = useRef<{ [key: string]: HTMLButtonElement | null }>({});
+  const [openMenuId, setOpenMenuId] = useState<number | null>(null);
+  const actionButtonRefs = useRef<{ [key: number]: HTMLButtonElement | null }>({});
 
   const loadParticipants = async () => {
     try {
@@ -81,7 +81,7 @@ export default function GerenciarParticipantes() {
     }
   };
 
-  const handleDelete = async (id: string) => {
+  const handleDelete = async (id: number) => {
     if (!window.confirm('Tem certeza que deseja excluir este participante?')) return;
 
     try {
@@ -135,7 +135,7 @@ export default function GerenciarParticipantes() {
     }
   };
 
-  const handleMenuClick = (participantId: string, event: React.MouseEvent<HTMLButtonElement>) => {
+  const handleMenuClick = (participantId: number, event: React.MouseEvent<HTMLButtonElement>) => {
     event.stopPropagation();
     event.preventDefault();
 
@@ -266,7 +266,7 @@ export default function GerenciarParticipantes() {
                           <circle cx="12" cy="19" r="1" />
                         </svg>
                       </button>
-                      {openMenuId === participant.id && (
+                        {openMenuId === participant.id && (
                         <div className={styles.adminPageActionMenu}>
                           <button onClick={() => {
                             handleEdit(participant);

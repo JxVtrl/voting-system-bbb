@@ -8,7 +8,7 @@ import AdminLayout from '@/components/admin/Layout';
 import styles from '@/styles/admin.module.scss';
 
 interface ParticipantResponse {
-  id: string;
+  id: number;
   name: string;
   imageUrl: string;
   status?: 'eliminado' | 'líder' | 'normal';
@@ -58,7 +58,7 @@ export default function Admin() {
     return () => clearInterval(interval);
   }, []);
 
-  const handleStartVoting = async (selectedIds: string[]) => {
+  const handleStartVoting = async (selectedIds: number[]) => {
     try {
       await api.startVoting(selectedIds);
       fetchVotingStatus();

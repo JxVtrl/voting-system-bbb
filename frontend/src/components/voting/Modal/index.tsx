@@ -6,12 +6,12 @@ import Image from 'next/image';
 
 interface ParedaoModalProps {
   onClose: () => void;
-  onConfirm: (selectedIds: string[]) => void;
+  onConfirm: (selectedIds: number[]) => void;
 }
 
 export function ParedaoModal({ onClose, onConfirm }: ParedaoModalProps) {
   const [participants, setParticipants] = useState<Participant[]>([]);
-  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const [selectedIds, setSelectedIds] = useState<number[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -37,10 +37,11 @@ export function ParedaoModal({ onClose, onConfirm }: ParedaoModalProps) {
     if (participant.status === 'líder') return;
 
     setSelectedIds(prev => {
-      if (prev.includes(participant.id)) {
-        return prev.filter(id => id !== participant.id);
+      const id = participant.id;
+      if (prev.includes(id)) {
+        return prev.filter(prevId => prevId !== id);
       }
-      return [...prev, participant.id];
+      return [...prev, id];
     });
   };
 
