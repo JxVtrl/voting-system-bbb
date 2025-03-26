@@ -15,17 +15,19 @@ export function AdminMenu({ participants, isVotingEnabled }: AdminMenuProps) {
   const router = useRouter();
   const [showParedaoModal, setShowParedaoModal] = useState(false);
 
-  const handleStartVoting = async (selectedIds: string[]) => {
+  const handleStartVoting = async (selectedIds: number[]): Promise<boolean> => {
     try {
       await api.startVoting(selectedIds);
       const selectedParticipants = participants.filter(p => selectedIds.includes(p.id));
       toast.success('Votação iniciada com sucesso!', {
         description: `Participantes: ${selectedParticipants.map(p => p.name).join(', ')}`,
       });
+      return true;
     } catch {
       toast.error('Erro ao iniciar votação', {
         description: 'Tente novamente mais tarde.',
       });
+      return false;
     }
   };
 

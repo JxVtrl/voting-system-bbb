@@ -58,12 +58,15 @@ export default function Admin() {
     return () => clearInterval(interval);
   }, []);
 
-  const handleStartVoting = async (selectedIds: number[]) => {
+  const handleStartVoting = async (selectedIds: number[]): Promise<boolean> => {
     try {
       await api.startVoting(selectedIds);
-      fetchVotingStatus();
+      await fetchVotingStatus();
+      setIsSelectionModalOpen(false);
+      return true;
     } catch (err) {
       console.error('Erro ao iniciar votação:', err);
+      return false;
     }
   };
 

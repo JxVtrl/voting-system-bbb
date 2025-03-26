@@ -7,7 +7,7 @@ interface ParticipantSelectionModalProps {
     isOpen: boolean;
     onClose: () => void;
     participants: Participant[];
-    onStartVoting: (selectedIds: number[]) => void;
+    onStartVoting: (selectedIds: number[]) => Promise<boolean>;
 }
 
 export default function ParticipantSelectionModal({
@@ -17,17 +17,19 @@ export default function ParticipantSelectionModal({
     onStartVoting,
 }: ParticipantSelectionModalProps) {
     const [selectedParticipants, setSelectedParticipants] = useState<number[]>([]);
+    const [isSubmitting, setIsSubmitting] = useState(false);
     const MIN_PARTICIPANTS = 2;
 
     // Reset estado quando o modal for fechado
     useEffect(() => {
         if (!isOpen) {
             setSelectedParticipants([]);
+            setIsSubmitting(false);
         }
     }, [isOpen]);
 
     const toggleParticipantSelection = (participant: Participant) => {
-        if (participant.status === 'líder') return;
+        if (participant.status === 'líder' || isSubmitting) return;
         
         setSelectedParticipants(prev => {
             const id = participant.id;
@@ -38,23 +40,31 @@ export default function ParticipantSelectionModal({
         });
     };
 
-    const handleStartVoting = () => {
-        if (selectedParticipants.length >= MIN_PARTICIPANTS) {
-            onStartVoting(selectedParticipants);
-            onClose();
+    const handleStartVoting = async () => {
+        if (selectedParticipants.length >= MIN_PARTICIPANTS && !isSubmitting) {
+            try {
+                setIsSubmitting(true);
+                await onStartVoting(selectedParticipants);
+            } catch (error) {
+                console.error('Erro ao iniciar votação:', error);
+            } finally {
+                setIsSubmitting(false);
+            }
         }
     };
 
     const handleClose = () => {
-        setSelectedParticipants([]);
-        onClose();
+        if (!isSubmitting) {
+            setSelectedParticipants([]);
+            onClose();
+        }
     };
 
     if (!isOpen) return null;
 
     return (
-        <div className={styles.participantSelectionModal}>
-            <div className={styles.participantSelectionModalContent}>
+        <div className={styles.participantSelectionModal} onClick={handleClose}>
+            <div className={styles.participantSelectionModalContent} onClick={e => e.stopPropagation()}>
                 <div className={styles.participantSelectionModalHeader}>
                     <h2 className={styles.participantSelectionModalTitle}>
                         Selecionar Participantes para o Paredão
@@ -62,6 +72,7 @@ export default function ParticipantSelectionModal({
                     <button
                         onClick={handleClose}
                         className={styles.participantSelectionModalCloseButton}
+                        disabled={isSubmitting}
                     >
                         <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -86,6 +97,10 @@ export default function ParticipantSelectionModal({
                                 } ${
                                     participant.status === 'líder'
                                         ? styles.participantSelectionModalParticipantCardLeader
+                                        : ''
+                                } ${
+                                    isSubmitting
+                                        ? styles.participantSelectionModalParticipantCardDisabled
                                         : ''
                                 }`}
                                 onClick={() => toggleParticipantSelection(participant)}
@@ -128,19 +143,29 @@ export default function ParticipantSelectionModal({
                         <button
                             onClick={handleClose}
                             className={styles.participantSelectionModalCancelButton}
+                            disabled={isSubmitting}
                         >
                             Cancelar
                         </button>
                         <button
                             onClick={handleStartVoting}
-                            disabled={selectedParticipants.length < MIN_PARTICIPANTS}
+                            disabled={selectedParticipants.length < MIN_PARTICIPANTS || isSubmitting}
                             className={`${styles.participantSelectionModalStartButton} ${
                                 selectedParticipants.length >= MIN_PARTICIPANTS
                                     ? styles.participantSelectionModalStartButtonEnabled
                                     : styles.participantSelectionModalStartButtonDisabled
                             }`}
                         >
-                            Iniciar Paredão
+                            {isSubmitting ? (
+                                <div className={styles.participantSelectionModalButtonLoading}>
+                                    <svg className={styles.participantSelectionModalSpinner} viewBox="0 0 24 24">
+                                        <circle cx="12" cy="12" r="10" fill="none" strokeWidth="4" />
+                                    </svg>
+                                    <span>Iniciando...</span>
+                                </div>
+                            ) : (
+                                'Iniciar Paredão'
+                            )}
                         </button>
                     </div>
                 </div>

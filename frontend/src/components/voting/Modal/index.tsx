@@ -6,13 +6,14 @@ import Image from 'next/image';
 
 interface ParedaoModalProps {
   onClose: () => void;
-  onConfirm: (selectedIds: number[]) => void;
+  onConfirm: (selectedIds: number[]) => Promise<boolean>;
 }
 
 export function ParedaoModal({ onClose, onConfirm }: ParedaoModalProps) {
   const [participants, setParticipants] = useState<Participant[]>([]);
   const [selectedIds, setSelectedIds] = useState<number[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     const loadParticipants = async () => {
@@ -34,7 +35,7 @@ export function ParedaoModal({ onClose, onConfirm }: ParedaoModalProps) {
   }, []);
 
   const handleParticipantClick = (participant: Participant) => {
-    if (participant.status === 'líder') return;
+    if (participant.status === 'líder' || isSubmitting) return;
 
     setSelectedIds(prev => {
       const id = participant.id;
@@ -45,14 +46,32 @@ export function ParedaoModal({ onClose, onConfirm }: ParedaoModalProps) {
     });
   };
 
-  const handleConfirm = () => {
-    if (selectedIds.length >= 2) {
-      onConfirm(selectedIds);
+  const handleConfirm = async () => {
+    if (selectedIds.length >= 2 && !isSubmitting) {
+      try {
+        setIsSubmitting(true);
+        const success = await onConfirm(selectedIds);
+        if (success) {
+          setSelectedIds([]);
+          onClose();
+        }
+      } catch (error) {
+        console.error('Erro ao confirmar seleção:', error);
+      } finally {
+        setIsSubmitting(false);
+      }
+    }
+  };
+
+  const handleClose = () => {
+    if (!isSubmitting) {
+      setSelectedIds([]);
+      onClose();
     }
   };
 
   return (
-    <div className={styles.paredaoModal} onClick={onClose}>
+    <div className={styles.paredaoModal} onClick={handleClose}>
       <div className={styles.paredaoModalContent} onClick={e => e.stopPropagation()}>
         <h2 className={styles.paredaoModalTitle}>
           {loading ? 'Carregando participantes...' : 'Selecione os Participantes para o Paredão'}
@@ -66,7 +85,9 @@ export function ParedaoModal({ onClose, onConfirm }: ParedaoModalProps) {
                   key={participant.id}
                   className={`${styles.paredaoModalCard} ${
                     selectedIds.includes(participant.id) ? styles.paredaoModalCardSelected : ''
-                  } ${participant.status === 'líder' ? styles.paredaoModalCardLeader : ''}`}
+                  } ${participant.status === 'líder' ? styles.paredaoModalCardLeader : ''} ${
+                    isSubmitting ? styles.paredaoModalCardDisabled : ''
+                  }`}
                   onClick={() => handleParticipantClick(participant)}
                 >
                   <Image
@@ -87,16 +108,26 @@ export function ParedaoModal({ onClose, onConfirm }: ParedaoModalProps) {
             <div className={styles.paredaoModalButtonGroup}>
               <button
                 className={styles.paredaoModalButton}
-                onClick={onClose}
+                onClick={handleClose}
+                disabled={isSubmitting}
               >
                 Cancelar
               </button>
               <button
                 className={styles.paredaoModalButton}
                 onClick={handleConfirm}
-                disabled={selectedIds.length < 2}
+                disabled={selectedIds.length < 2 || isSubmitting}
               >
-                Confirmar ({selectedIds.length} selecionados)
+                {isSubmitting ? (
+                  <div className={styles.paredaoModalButtonLoading}>
+                    <svg className={styles.paredaoModalSpinner} viewBox="0 0 24 24">
+                      <circle cx="12" cy="12" r="10" fill="none" strokeWidth="4" />
+                    </svg>
+                    <span>Confirmando...</span>
+                  </div>
+                ) : (
+                  `Confirmar (${selectedIds.length} selecionados)`
+                )}
               </button>
             </div>
           </>
