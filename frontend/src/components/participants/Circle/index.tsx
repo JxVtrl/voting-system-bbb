@@ -12,7 +12,7 @@ export function ParticipantCircle({ participant }: ParticipantCircleProps) {
     return (
         <div className={styles.participantCircle}>
             <div className={styles.participantCircleTooltip}>
-                <div className={styles.participantCircleTooltipContent}>{name}</div>
+                {name}
             </div>
             <div className={`${styles.participantCircleContainer} ${!isActive ? styles.participantCircleContainerInactive : ''}`}>
                 <div className={styles.participantCircleImageContainer}>
@@ -26,11 +26,11 @@ export function ParticipantCircle({ participant }: ParticipantCircleProps) {
                     />
                 </div>
                 {status === 'líder' && (
-                    <div className={`${styles.participantCircleStatus} ${styles.participantCircleStatus}--${status}`}>
+                    <div className={styles.participantCircleStatus}>
                         {status}
                     </div>
                 )}
             </div>
         </div>
     );
-} 
+}

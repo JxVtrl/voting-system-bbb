@@ -1,24 +1,53 @@
-.participants-scroll {
+.participantsScroll {
   width: 100%;
-  overflow-x: auto;
-  padding: 1rem 0;
-  -webkit-overflow-scrolling: touch;
-  scrollbar-width: none;
-  -ms-overflow-style: none;
+  position: relative;
+  background: linear-gradient(to right, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
+  border-radius: 12px;
+  padding: 1.5rem 0;
+  margin: 1rem 0;
 
-  &::-webkit-scrollbar {
-    display: none;
-  }
-
-  &__container {
+  &Container {
     display: flex;
-    gap: 1rem;
-    padding: 0 1rem;
+    width: 100%;
+    justify-content: space-between;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    align-items: center;
+    overflow: visible;
+
+    &::-webkit-scrollbar {
+      display: none;
+    }
+
+    @media (max-width: 640px) {
+      gap: 1rem;
+    }
   }
 
-  &__loading {
-    text-align: center;
-    padding: 2rem;
+  &Loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 120px;
     color: #6b7280;
+    font-size: 1rem;
+    font-weight: 500;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 8px;
+    margin: 1rem;
+    animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: .5;
   }
 } 
