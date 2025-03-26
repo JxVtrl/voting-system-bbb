@@ -1,179 +1,152 @@
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
+import styled from 'styled-components';
+import { Participant, VotingStatus } from '../types';
+import { api } from '../services/api';
 import Head from 'next/head';
-import Image from 'next/image';
+import { VotingPanel } from '@/components/VotingPanel';
+import { ParticipantsScroll } from '@/components/ParticipantsScroll';
 
-interface Participant {
-  id: string;
-  name: string;
-  imageUrl: string;
-  status?: string;
-  isActive: boolean;
-  votes?: number;
-}
+const PageContainer = styled.div`
+  min-height: 100vh;
+  max-height: 100vh;
+  overflow-y: auto;
+  background: linear-gradient(135deg, #f5f7fa 0%, #e4e7eb 100%);
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
 
-interface VotingStatus {
-  isEnabled: boolean;
-  startTime?: string;
-  endTime?: string;
-  totalVotes: number;
-  participants: Participant[];
-}
+  /* Esconde a scrollbar mas mantém a funcionalidade */
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+`;
+
+const Header = styled.header`
+  text-align: center;
+  padding: 10px 0;
+  margin-bottom: 20px;
+  flex-shrink: 0;
+`;
+
+const ContentContainer = styled.div`
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+  width: 100%;
+`;
+
+const Logo = styled.h1`
+  font-size: 42px;
+  font-weight: bold;
+  color: #333;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  margin: 0;
+  
+  /* Efeito de texto com sombra */
+  text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+  
+  /* Gradiente no texto */
+  background: linear-gradient(45deg, #FF0000, #FF6B6B);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+`;
+
+const LoadingContainer = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  font-size: 24px;
+  color: #666;
+`;
+
+const ErrorContainer = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  font-size: 24px;
+  color: #ff4444;
+`;
 
 export default function Home() {
   const [participants, setParticipants] = useState<Participant[]>([]);
   const [votingStatus, setVotingStatus] = useState<VotingStatus>({
     isEnabled: false,
-    totalVotes: 0,
-    participants: []
+    participants: [],
+    totalVotes: 0
   });
-  const [isLoading, setIsLoading] = useState(true);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchParticipants = async () => {
-    try {
-      const response = await fetch('http://localhost:8080/participantes');
-      if (!response.ok) throw new Error('Erro ao buscar participantes');
-      const data = await response.json();
-      setParticipants(data);
-    } catch (err) {
-      setError('Erro ao carregar participantes');
-      console.error('Erro ao buscar participantes:', err);
-    }
-  };
-
-  const fetchVotingStatus = async () => {
-    try {
-      const response = await fetch('http://localhost:8080/status');
-      if (!response.ok) throw new Error('Erro ao buscar status');
-      const data = await response.json();
-      setVotingStatus(data);
-    } catch (err) {
-      setError('Erro ao carregar status da votação');
-      console.error('Erro ao buscar status:', err);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
   useEffect(() => {
-    fetchParticipants();
-    fetchVotingStatus();
-    const interval = setInterval(fetchVotingStatus, 5000);
-    return () => clearInterval(interval);
+    async function loadData() {
+      try {
+        const [participantsData, statusData] = await Promise.all([
+          api.getParticipants(),
+          api.getVotingStatus()
+        ]);
+        setParticipants(participantsData);
+        setVotingStatus(statusData);
+      } catch (err) {
+        setError('Erro ao carregar dados');
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    loadData();
   }, []);
 
   const handleVote = async (participantId: string) => {
     try {
-      const response = await fetch('http://localhost:8080/votar', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ participante: participantId }),
-      });
-      
-      if (!response.ok) throw new Error('Erro ao registrar voto');
-      
-      fetchVotingStatus();
+      await api.vote(participantId);
+      const newStatus = await api.getVotingStatus();
+      setVotingStatus(newStatus);
     } catch (err) {
-      console.error('Erro ao votar:', err);
-      setError('Erro ao registrar voto');
+      console.error(err);
+      alert('Erro ao registrar voto');
     }
   };
 
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-gray-100 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
-      </div>
-    );
+  if (loading) {
+    return <LoadingContainer>Carregando...</LoadingContainer>;
   }
 
   if (error) {
-    return (
-      <div className="min-h-screen bg-gray-100 flex items-center justify-center">
-        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
-          <p>{error}</p>
-        </div>
-      </div>
-    );
+    return <ErrorContainer>{error}</ErrorContainer>;
   }
 
   return (
-    <div className="min-h-screen bg-gray-100">
+    <>
       <Head>
         <title>BBB 25 - Sistema de Votação</title>
         <meta name="description" content="Sistema de votação para o BBB 25" />
-        <link rel="icon" href="/favicon.ico" />
       </Head>
 
-      <main className="container mx-auto px-4 py-8">
-        <h1 className="text-3xl font-bold text-gray-900 text-center mb-8">BBB 25 - Participantes</h1>
-        
-        {/* Lista de Participantes */}
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 mb-8">
-          {participants.map((participant) => (
-            <div
-              key={participant.id}
-              className={`relative bg-white rounded-lg shadow-md p-4 text-center ${
-                !participant.isActive ? 'opacity-50' : ''
-              }`}
-            >
-              <div className="relative w-24 h-24 mx-auto mb-2">
-                <Image
-                  src={participant.imageUrl}
-                  alt={participant.name}
-                  fill
-                  className="rounded-full object-cover"
-                />
-                {participant.status && (
-                  <div className="absolute -top-2 -right-2 bg-blue-600 text-white text-xs px-2 py-1 rounded-full font-medium">
-                    {participant.status}
-                  </div>
-                )}
-              </div>
-              <h2 className="font-semibold text-gray-900">{participant.name}</h2>
-              {participant.votes !== undefined && (
-                <p className="text-sm font-medium text-gray-700">Votos: {participant.votes.toLocaleString()}</p>
-              )}
-            </div>
-          ))}
-        </div>
+      <PageContainer>
+        <Header>
+          <Logo>BBB 25</Logo>
+        </Header>
 
-        {/* Paredão Atual */}
-        {votingStatus.isEnabled && votingStatus.participants.length > 0 && (
-          <div className="bg-white rounded-lg shadow-md p-6 mb-8">
-            <h2 className="text-2xl font-bold text-gray-900 text-center mb-4">Paredão Atual</h2>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              {votingStatus.participants.map((participant) => (
-                <div key={participant.id} className="text-center">
-                  <div className="relative w-32 h-32 mx-auto mb-2">
-                    <Image
-                      src={participant.imageUrl}
-                      alt={participant.name}
-                      fill
-                      className="rounded-full object-cover"
-                    />
-                  </div>
-                  <h3 className="font-semibold text-gray-900">{participant.name}</h3>
-                  <p className="text-sm font-medium text-gray-700 mb-2">Votos: {participant.votes?.toLocaleString() || '0'}</p>
-                  <button
-                    onClick={() => handleVote(participant.id)}
-                    className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition-colors font-medium"
-                  >
-                    Votar
-                  </button>
-                </div>
-              ))}
-            </div>
-            <div className="text-center mt-4">
-              <p className="text-lg font-semibold text-gray-900">
-                Total de votos: {votingStatus.totalVotes.toLocaleString()}
-              </p>
-            </div>
-          </div>
-        )}
-      </main>
-    </div>
+        <ContentContainer>
+          <ParticipantsScroll participants={participants} />
+
+          <VotingPanel
+            participants={votingStatus.participants}
+            onVote={handleVote}
+            isVotingEnabled={votingStatus.isEnabled}
+          />
+        </ContentContainer>
+      </PageContainer>
+    </>
   );
 }

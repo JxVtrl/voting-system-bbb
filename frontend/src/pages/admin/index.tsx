@@ -211,7 +211,7 @@ export default function Admin() {
             </div>
           ) : (
             <p className="text-gray-700 text-center py-4">
-              Clique em "Iniciar Paredão" para selecionar os participantes
+              Clique em &rdquo;Iniciar Paredão&rdquo; para selecionar os participantes
             </p>
           )}
         </div>
