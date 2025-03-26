@@ -1,18 +1,19 @@
 .container {
   position: fixed;
-  top: 20px;
+  bottom: 20px;
   right: 20px;
   z-index: 9999;
   display: flex;
   flex-direction: column;
   gap: 8px;
   pointer-events: none;
+  width: auto;
 
   @media (max-width: 768px) {
-    top: auto;
-    bottom: 80px;
-    right: 16px;
-    left: 16px;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    padding: 16px;
   }
 }
 
@@ -28,35 +29,85 @@
   max-width: 400px;
   width: 100%;
   opacity: 0;
-  transform: translateX(100%);
+  transform: translateY(100%);
   transition: all 0.3s ease;
   position: relative;
   border: 1px solid #e2e8f0;
 
+  @media (max-width: 768px) {
+    max-width: 100%;
+    border-radius: 8px 8px 0 0;
+    box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.1);
+  }
+
   &.visible {
     opacity: 1;
-    transform: translateX(0);
+    transform: translateY(0);
   }
 
   &.hidden {
     opacity: 0;
-    transform: translateX(100%);
+    transform: translateY(100%);
   }
 
   &.success {
     border-left: 4px solid #48bb78;
+
+    @media (max-width: 768px) {
+      border-left: none;
+      border-top: 4px solid #48bb78;
+    }
   }
 
   &.error {
     border-left: 4px solid #f56565;
+
+    @media (max-width: 768px) {
+      border-left: none;
+      border-top: 4px solid #f56565;
+    }
   }
 
   &.info {
     border-left: 4px solid #4299e1;
+
+    @media (max-width: 768px) {
+      border-left: none;
+      border-top: 4px solid #4299e1;
+    }
   }
 
   &.warning {
     border-left: 4px solid #ecc94b;
+
+    @media (max-width: 768px) {
+      border-left: none;
+      border-top: 4px solid #ecc94b;
+    }
+  }
+
+  // Estilo especial para o menu administrativo
+  &.adminMenuToast {
+    @media (max-width: 768px) {
+      position: fixed !important;
+      top: 50% !important;
+      left: 50% !important;
+      transform: translate(-50%, -50%) !important;
+      width: calc(100% - 32px) !important;
+      min-width: auto !important;
+      max-width: 400px !important;
+      margin: 0 !important;
+      border-radius: 8px !important;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1) !important;
+
+      &.visible {
+        transform: translate(-50%, -50%) !important;
+      }
+
+      &.hidden {
+        transform: translate(-50%, 100%) !important;
+      }
+    }
   }
 }
 
