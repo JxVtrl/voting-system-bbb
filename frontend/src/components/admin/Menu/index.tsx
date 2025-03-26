@@ -1,9 +1,9 @@
-import { toast } from 'sonner';
 import { api } from '@/services/api';
 import { Participant, VotingHistory } from '@/types';
 import { useRouter } from 'next/router';
 import { useState } from 'react';
 import { ParedaoModal } from '@/components/voting/Modal';
+import { useToast } from '@/components/ui/custom-toast';
 import styles from './styles.module.scss';
 
 interface AdminMenuProps {
@@ -11,20 +11,25 @@ interface AdminMenuProps {
   isVotingEnabled: boolean;
 }
 
+const ADMIN_MENU_ID = 'admin-menu';
+
 export function AdminMenu({ participants, isVotingEnabled }: AdminMenuProps) {
   const router = useRouter();
   const [showParedaoModal, setShowParedaoModal] = useState(false);
+  const toast = useToast();
 
   const handleStartVoting = async (selectedIds: number[]): Promise<boolean> => {
     try {
       await api.startVoting(selectedIds);
       const selectedParticipants = participants.filter(p => selectedIds.includes(p.id));
-      toast.success('Votação iniciada com sucesso!', {
+      toast.success({
+        title: 'Votação iniciada com sucesso!',
         description: `Participantes: ${selectedParticipants.map(p => p.name).join(', ')}`,
       });
       return true;
     } catch {
-      toast.error('Erro ao iniciar votação', {
+      toast.error({
+        title: 'Erro ao iniciar votação',
         description: 'Tente novamente mais tarde.',
       });
       return false;
@@ -34,9 +39,12 @@ export function AdminMenu({ participants, isVotingEnabled }: AdminMenuProps) {
   const handleEndVoting = async () => {
     try {
       await api.endVoting();
-      toast.success('Votação encerrada com sucesso!');
+      toast.success({
+        title: 'Votação encerrada com sucesso!'
+      });
     } catch {
-      toast.error('Erro ao encerrar votação', {
+      toast.error({
+        title: 'Erro ao encerrar votação',
         description: 'Tente novamente mais tarde.',
       });
     }
@@ -45,7 +53,8 @@ export function AdminMenu({ participants, isVotingEnabled }: AdminMenuProps) {
   const handleShowHistory = async () => {
     try {
       const history = await api.getVotingHistory();
-      toast.info('Histórico de Votações', {
+      toast.info({
+        title: 'Histórico de Votações',
         description: (
           <div>
             {(history as VotingHistory[]).map((vote: VotingHistory, index: number) => (
@@ -64,15 +73,16 @@ export function AdminMenu({ participants, isVotingEnabled }: AdminMenuProps) {
         duration: 10000,
       });
     } catch {
-      toast.error('Erro ao carregar histórico', {
+      toast.error({
+        title: 'Erro ao carregar histórico',
         description: 'Tente novamente mais tarde.',
       });
     }
   };
 
   const showAdminMenu = () => {
-    toast.info('', {
-      id: 'admin-menu',
+    toast.info({
+      id: ADMIN_MENU_ID,
       description: (
         <div className={styles.adminMenuContent}>
           <div className={styles.adminMenuHeader}>
@@ -89,7 +99,7 @@ export function AdminMenu({ participants, isVotingEnabled }: AdminMenuProps) {
               } else {
                 setShowParedaoModal(true);
               }
-              toast.dismiss('admin-menu');
+              toast.dismiss(ADMIN_MENU_ID);
             }}
           >
             {isVotingEnabled ? 'Encerrar Votação' : 'Iniciar Nova Votação'}
@@ -99,7 +109,7 @@ export function AdminMenu({ participants, isVotingEnabled }: AdminMenuProps) {
             className={`${styles.adminMenuButton} ${styles.adminMenuButtonSecondary}`}
             onClick={() => {
               handleShowHistory();
-              toast.dismiss('admin-menu');
+              toast.dismiss(ADMIN_MENU_ID);
             }}
           >
             Ver Histórico
@@ -111,7 +121,7 @@ export function AdminMenu({ participants, isVotingEnabled }: AdminMenuProps) {
             className={`${styles.adminMenuButton} ${styles.adminMenuButtonSecondary}`}
             onClick={() => {
               router.push('/admin/participantes');
-              toast.dismiss('admin-menu');
+              toast.dismiss(ADMIN_MENU_ID);
             }}
           >
             Gerenciar Participantes
@@ -121,7 +131,7 @@ export function AdminMenu({ participants, isVotingEnabled }: AdminMenuProps) {
             className={`${styles.adminMenuButton} ${styles.adminMenuButtonSecondary}`}
             onClick={() => {
               router.push('/admin/estatisticas');
-              toast.dismiss('admin-menu');
+              toast.dismiss(ADMIN_MENU_ID);
             }}
           >
             Estatísticas
@@ -131,7 +141,7 @@ export function AdminMenu({ participants, isVotingEnabled }: AdminMenuProps) {
             className={`${styles.adminMenuButton} ${styles.adminMenuButtonSecondary}`}
             onClick={() => {
               router.push('/admin/votacoes');
-              toast.dismiss('admin-menu');
+              toast.dismiss(ADMIN_MENU_ID);
             }}
           >
             Histórico Detalhado

@@ -1,6 +1,7 @@
 import "@/styles/globals.css";
 import type { AppProps } from "next/app";
 import { createGlobalStyle } from 'styled-components';
+import { ToastContainer } from '@/components/ui/custom-toast';
 
 const GlobalStyle = createGlobalStyle`
   * {
@@ -32,6 +33,7 @@ export default function App({ Component, pageProps }: AppProps) {
     <>
       <GlobalStyle />
       <Component {...pageProps} />
+      <ToastContainer />
     </>
   );
 }

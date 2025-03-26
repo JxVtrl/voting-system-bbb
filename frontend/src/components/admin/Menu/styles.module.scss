@@ -18,6 +18,14 @@
       right: 20px;
       width: auto;
       z-index: 100;
+
+      @media (max-width: 768px) {
+        top: auto;
+        bottom: 20px;
+        right: 20px;
+        padding: 12px 20px;
+        font-size: 16px;
+      }
     }
 
     &:hover {
@@ -49,6 +57,11 @@
     padding: 16px;
     width: 100%;
     min-width: 300px;
+
+    @media (max-width: 768px) {
+      min-width: 100%;
+      padding: 12px;
+    }
   }
 
   &Header {
@@ -86,5 +99,16 @@
     transition: none !important;
     height: auto !important;
     max-height: none !important;
+
+    @media (max-width: 768px) {
+      position: fixed !important;
+      top: 50% !important;
+      left: 50% !important;
+      transform: translate(-50%, -50%) !important;
+      width: calc(100% - 32px) !important;
+      min-width: auto !important;
+      max-width: 400px !important;
+      margin: 0 !important;
+    }
   }
 } 
