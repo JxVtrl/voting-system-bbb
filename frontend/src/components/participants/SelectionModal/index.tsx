@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { Participant } from '@/types';
 import styles from './styles.module.scss';
@@ -19,12 +19,21 @@ export default function ParticipantSelectionModal({
     const [selectedParticipants, setSelectedParticipants] = useState<string[]>([]);
     const MIN_PARTICIPANTS = 2;
 
-    const toggleParticipantSelection = (participantId: string) => {
+    // Reset estado quando o modal for fechado
+    useEffect(() => {
+        if (!isOpen) {
+            setSelectedParticipants([]);
+        }
+    }, [isOpen]);
+
+    const toggleParticipantSelection = (participant: Participant) => {
+        if (participant.status === 'líder') return;
+        
         setSelectedParticipants(prev => {
-            if (prev.includes(participantId)) {
-                return prev.filter(id => id !== participantId);
+            if (prev.includes(participant.id)) {
+                return prev.filter(id => id !== participant.id);
             }
-            return [...prev, participantId];
+            return [...prev, participant.id];
         });
     };
 
@@ -32,8 +41,12 @@ export default function ParticipantSelectionModal({
         if (selectedParticipants.length >= MIN_PARTICIPANTS) {
             onStartVoting(selectedParticipants);
             onClose();
-            setSelectedParticipants([]);
         }
+    };
+
+    const handleClose = () => {
+        setSelectedParticipants([]);
+        onClose();
     };
 
     if (!isOpen) return null;
@@ -46,7 +59,7 @@ export default function ParticipantSelectionModal({
                         Selecionar Participantes para o Paredão
                     </h2>
                     <button
-                        onClick={onClose}
+                        onClick={handleClose}
                         className={styles.participantSelectionModalCloseButton}
                     >
                         <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -56,7 +69,7 @@ export default function ParticipantSelectionModal({
                 </div>
 
                 <p className={styles.participantSelectionModalDescription}>
-                    Selecione no mínimo {MIN_PARTICIPANTS} participantes para o paredão. Apenas participantes ativos estão disponíveis.
+                    Selecione no mínimo {MIN_PARTICIPANTS} participantes para o paredão. O líder não pode ser selecionado.
                 </p>
 
                 <div className={styles.participantSelectionModalGrid}>
@@ -69,8 +82,12 @@ export default function ParticipantSelectionModal({
                                     selectedParticipants.includes(participant.id)
                                         ? styles.participantSelectionModalParticipantCardSelected
                                         : ''
+                                } ${
+                                    participant.status === 'líder'
+                                        ? styles.participantSelectionModalParticipantCardLeader
+                                        : ''
                                 }`}
-                                onClick={() => toggleParticipantSelection(participant.id)}
+                                onClick={() => toggleParticipantSelection(participant)}
                             >
                                 <div className={styles.participantSelectionModalParticipantImage}>
                                     <Image
@@ -82,6 +99,11 @@ export default function ParticipantSelectionModal({
                                     {selectedParticipants.includes(participant.id) && (
                                         <div className={styles.participantSelectionModalSelectedBadge}>
                                             Selecionado
+                                        </div>
+                                    )}
+                                    {participant.status === 'líder' && (
+                                        <div className={styles.participantSelectionModalLeaderBadge}>
+                                            Líder
                                         </div>
                                     )}
                                 </div>
@@ -103,7 +125,7 @@ export default function ParticipantSelectionModal({
                     </p>
                     <div className={styles.participantSelectionModalActions}>
                         <button
-                            onClick={onClose}
+                            onClick={handleClose}
                             className={styles.participantSelectionModalCancelButton}
                         >
                             Cancelar
