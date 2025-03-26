@@ -2,10 +2,12 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
 	"strings"
 	"time"
+	"github.com/google/uuid"
 )
 
 type Participant struct {
@@ -111,54 +113,61 @@ func getVotingStatus(w http.ResponseWriter, r *http.Request) {
 	log.Printf("Status da votação enviado com sucesso. Total de votos: %d", votingStatus.TotalVotes)
 }
 
-func startVoting(w http.ResponseWriter, r *http.Request) {
-	log.Println("Iniciando nova votação")
+func handleStartVoting(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
-		log.Printf("Método não permitido: %s", r.Method)
 		http.Error(w, "Método não permitido", http.StatusMethodNotAllowed)
 		return
 	}
 
 	var request struct {
-		Participantes []string `json:"participantes"`
+		ParticipantIDs []string `json:"participantIds"`
 	}
+
 	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
-		log.Printf("Erro ao decodificar requisição: %v", err)
 		http.Error(w, "Erro ao decodificar requisição", http.StatusBadRequest)
 		return
 	}
 
-	if len(request.Participantes) != 3 {
-		log.Printf("Número incorreto de participantes: %d", len(request.Participantes))
-		http.Error(w, "Deve selecionar exatamente 3 participantes", http.StatusBadRequest)
+	// Verifica se há pelo menos 2 participantes
+	if len(request.ParticipantIDs) < 2 {
+		http.Error(w, "Número incorreto de participantes: mínimo de 2 participantes", http.StatusBadRequest)
 		return
 	}
 
-	log.Printf("Participantes selecionados para o paredão: %v", request.Participantes)
-	votingStatus.IsEnabled = true
-	votingStatus.StartTime = time.Now().Format(time.RFC3339)
-	votingStatus.Participants = make([]Participant, 0)
-	votingStatus.TotalVotes = 0
-
-	for _, id := range request.Participantes {
-		for _, p := range participants {
-			if p.ID == id {
-				votingStatus.Participants = append(votingStatus.Participants, Participant{
-					ID:       p.ID,
-					Name:     p.Name,
-					ImageURL: p.ImageURL,
-					Status:   p.Status,
-					IsActive: p.IsActive,
-					Votes:    0,
-				})
-				log.Printf("Participante adicionado ao paredão: %s", p.Name)
-				break
-			}
+	// Verifica se todos os participantes existem e não são líderes
+	var selectedParticipants []Participant
+	for _, id := range request.ParticipantIDs {
+		participant, exists := participants[id]
+		if !exists {
+			http.Error(w, fmt.Sprintf("Participante não encontrado: %s", id), http.StatusBadRequest)
+			return
 		}
+		if participant.Status == "líder" {
+			http.Error(w, fmt.Sprintf("Participante é líder e não pode participar do paredão: %s", participant.Name), http.StatusBadRequest)
+			return
+		}
+		selectedParticipants = append(selectedParticipants, participant)
+	}
+
+	// Inicia a votação
+	currentVoting = &Voting{
+		ID:           uuid.New().String(),
+		Participants: selectedParticipants,
+		StartTime:    time.Now(),
+		Votes:        make(map[string]int),
+	}
+
+	// Atualiza o status dos participantes
+	for _, participant := range selectedParticipants {
+		p := participants[participant.ID]
+		p.Status = "no paredão"
+		participants[participant.ID] = p
 	}
 
 	w.WriteHeader(http.StatusOK)
-	log.Println("Paredão iniciado com sucesso")
+	json.NewEncoder(w).Encode(map[string]string{
+		"message": "Votação iniciada com sucesso",
+	})
 }
 
 func endVoting(w http.ResponseWriter, r *http.Request) {
@@ -348,7 +357,7 @@ func main() {
 		}
 	})
 	http.HandleFunc("/status", corsMiddleware(getVotingStatus))
-	http.HandleFunc("/iniciar-votacao", corsMiddleware(startVoting))
+	http.HandleFunc("/iniciar-votacao", corsMiddleware(handleStartVoting))
 	http.HandleFunc("/encerrar-votacao", corsMiddleware(endVoting))
 	http.HandleFunc("/historico", corsMiddleware(getVotingHistory))
 	http.HandleFunc("/votar", corsMiddleware(vote))

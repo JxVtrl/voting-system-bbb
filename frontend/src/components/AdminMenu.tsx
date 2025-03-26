@@ -31,6 +31,25 @@ const MenuContent = styled.div`
   display: flex;
   flex-direction: column;
   gap: 8px;
+  padding: 4px;
+  width: 100%;
+  min-width: 300px;
+`;
+
+const MenuHeader = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #e2e8f0;
+`;
+
+const MenuTitle = styled.h3`
+  color: #1a365d;
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin: 0;
 `;
 
 const MenuButton = styled.button<{ $variant?: 'danger' | 'secondary' }>`
@@ -39,28 +58,41 @@ const MenuButton = styled.button<{ $variant?: 'danger' | 'secondary' }>`
       case 'danger':
         return '#dc3545';
       case 'secondary':
-        return '#666';
+        return '#718096';
       default:
-        return '#0070f3';
+        return '#3182ce';
     }
   }};
   color: white;
   border: none;
-  border-radius: 4px;
-  padding: 8px 12px;
+  border-radius: 6px;
+  padding: 10px 16px;
   cursor: pointer;
-  font-size: 14px;
+  font-size: 0.95rem;
   width: 100%;
   text-align: left;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.2s ease;
 
   &:hover {
-    opacity: 0.9;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
   }
 
   &:disabled {
-    background: #ccc;
+    background: #cbd5e0;
     cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
   }
+`;
+
+const MenuDivider = styled.div`
+  height: 1px;
+  background: #e2e8f0;
+  margin: 4px 0;
 `;
 
 interface AdminMenuProps {
@@ -126,29 +158,28 @@ export function AdminMenu({ participants, isVotingEnabled }: AdminMenuProps) {
   };
 
   const showAdminMenu = () => {
-    toast.info('Menu Administrativo', {
+    toast.info('', {
       id: 'admin-menu',
       description: (
         <MenuContent>
+          <MenuHeader>
+            <MenuTitle>Menu Administrativo</MenuTitle>
+          </MenuHeader>
+
           <MenuButton
             onClick={() => {
-              setShowParedaoModal(true);
+              if (isVotingEnabled) {
+                handleEndVoting();
+              } else {
+                setShowParedaoModal(true);
+              }
               toast.dismiss('admin-menu');
             }}
-            disabled={isVotingEnabled}
+            $variant={isVotingEnabled ? 'danger' : undefined}
           >
-            Iniciar Nova Votação
+            {isVotingEnabled ? 'Encerrar Votação' : 'Iniciar Nova Votação'}
           </MenuButton>
-          <MenuButton
-            onClick={() => {
-              handleEndVoting();
-              toast.dismiss('admin-menu');
-            }}
-            disabled={!isVotingEnabled}
-            $variant="secondary"
-          >
-            Encerrar Votação
-          </MenuButton>
+
           <MenuButton
             onClick={() => {
               handleShowHistory();
@@ -158,6 +189,9 @@ export function AdminMenu({ participants, isVotingEnabled }: AdminMenuProps) {
           >
             Ver Histórico
           </MenuButton>
+
+          <MenuDivider />
+
           <MenuButton
             onClick={() => {
               router.push('/admin/participantes');
@@ -166,6 +200,7 @@ export function AdminMenu({ participants, isVotingEnabled }: AdminMenuProps) {
           >
             Gerenciar Participantes
           </MenuButton>
+
           <MenuButton
             onClick={() => {
               router.push('/admin/estatisticas');
@@ -174,6 +209,7 @@ export function AdminMenu({ participants, isVotingEnabled }: AdminMenuProps) {
           >
             Estatísticas
           </MenuButton>
+
           <MenuButton
             onClick={() => {
               router.push('/admin/historico');
@@ -185,6 +221,21 @@ export function AdminMenu({ participants, isVotingEnabled }: AdminMenuProps) {
         </MenuContent>
       ),
       duration: Infinity,
+      className: 'admin-menu-toast',
+      style: {
+        background: 'white',
+        color: '#1a365d',
+        padding: '16px',
+        borderRadius: '8px',
+        boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+        border: '1px solid #e2e8f0',
+        width: 'auto',
+        minWidth: '300px',
+        transform: 'none !important',
+        transition: 'none !important',
+        height: 'auto !important',
+        maxHeight: 'none !important',
+      },
     });
   };
 
