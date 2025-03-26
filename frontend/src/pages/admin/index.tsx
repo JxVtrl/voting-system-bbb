@@ -135,7 +135,7 @@ export default function AdminDashboard() {
 
       <main className="container mx-auto px-4 py-8">
         <div className="flex justify-between items-center mb-8">
-          <h1 className="text-3xl font-bold">Painel Administrativo</h1>
+          <h1 className="text-3xl font-bold text-gray-900">Painel Administrativo</h1>
           <div className="space-x-4">
             <Link href="/admin/votacoes" className="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600">
               Histórico
@@ -152,88 +152,72 @@ export default function AdminDashboard() {
           </div>
         )}
 
-        {/* Status do Paredão */}
+        {/* Status da Votação */}
         <div className="bg-white rounded-lg shadow-md p-6 mb-8">
-          <h2 className="text-2xl font-bold mb-4">Status do Paredão</h2>
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-lg">
-                Status: <span className={votingStatus.isEnabled ? 'text-green-600' : 'text-red-600'}>
-                  {votingStatus.isEnabled ? 'Ativo' : 'Inativo'}
-                </span>
-              </p>
-              {votingStatus.isEnabled && (
-                <p className="text-sm text-gray-600">
-                  Total de votos: {votingStatus.totalVotes}
-                </p>
-              )}
+          <h2 className="text-2xl font-bold text-gray-900 mb-4">Status da Votação</h2>
+          <div className="flex items-center space-x-4">
+            <div className={`w-3 h-3 rounded-full mr-2 ${votingStatus.isEnabled ? 'bg-green-500' : 'bg-red-500'}`}></div>
+            <span className="text-gray-900 font-medium">
+              {votingStatus.isEnabled ? 'Votação Ativa' : 'Votação Inativa'}
+            </span>
+          </div>
+          {votingStatus.isEnabled && (
+            <div className="text-gray-700">
+              <p className="font-medium">Início: {new Date(votingStatus.startTime!).toLocaleString()}</p>
+              <p className="font-medium">Fim: {new Date(votingStatus.endTime!).toLocaleString()}</p>
             </div>
-            <div className="space-x-4">
-              {!votingStatus.isEnabled ? (
-                <button
-                  onClick={handleStartVoting}
-                  disabled={selectedParticipants.length !== 3}
-                  className={`px-4 py-2 rounded ${
-                    selectedParticipants.length === 3
-                      ? 'bg-green-500 hover:bg-green-600'
-                      : 'bg-gray-300 cursor-not-allowed'
-                  } text-white`}
-                >
-                  Iniciar Paredão
-                </button>
-              ) : (
-                <button
-                  onClick={handleEndVoting}
-                  className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
-                >
-                  Encerrar Paredão
-                </button>
-              )}
-            </div>
+          )}
+        </div>
+
+        {/* Controles de Votação */}
+        <div className="bg-white rounded-lg shadow-md p-6 mb-8">
+          <h2 className="text-2xl font-bold text-gray-900 mb-4">Controles de Votação</h2>
+          <div className="flex space-x-4">
+            <button
+              onClick={handleStartVoting}
+              disabled={votingStatus.isEnabled}
+              className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              Iniciar Votação
+            </button>
+            <button
+              onClick={handleEndVoting}
+              disabled={!votingStatus.isEnabled}
+              className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              Encerrar Votação
+            </button>
           </div>
         </div>
 
         {/* Lista de Participantes */}
         <div className="bg-white rounded-lg shadow-md p-6">
-          <h2 className="text-2xl font-bold mb-4">Participantes Disponíveis</h2>
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-            {participants
-              .filter(p => p.isActive)
-              .map((participant) => (
-                <div
-                  key={participant.id}
-                  className={`border-2 rounded-lg p-4 text-center cursor-pointer transition-colors ${
-                    selectedParticipants.includes(participant.id)
-                      ? 'border-blue-500 bg-blue-50'
-                      : 'border-gray-200 hover:border-blue-300'
-                  }`}
-                  onClick={() => toggleParticipantSelection(participant.id)}
-                >
-                  <div className="relative w-24 h-24 mx-auto mb-2">
+          <h2 className="text-2xl font-bold text-gray-900 mb-4">Participantes</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {participants.map((participant) => (
+              <div
+                key={participant.id}
+                className="bg-gray-50 rounded-lg p-4"
+              >
+                <div className="flex items-center space-x-4">
+                  <div className="relative w-16 h-16">
                     <Image
                       src={participant.imageUrl}
                       alt={participant.name}
                       fill
                       className="rounded-full object-cover"
                     />
-                    {participant.status && (
-                      <div className="absolute -top-2 -right-2 bg-blue-500 text-white text-xs px-2 py-1 rounded-full">
-                        {participant.status}
-                      </div>
-                    )}
                   </div>
-                  <h3 className="font-semibold">{participant.name}</h3>
-                  {selectedParticipants.includes(participant.id) && (
-                    <p className="text-sm text-blue-600">Selecionado</p>
-                  )}
+                  <div>
+                    <h3 className="font-semibold text-gray-900">{participant.name}</h3>
+                    <p className="text-sm font-medium text-gray-700">
+                      Votos: {participant.votes?.toLocaleString() || '0'}
+                    </p>
+                  </div>
                 </div>
-              ))}
+              </div>
+            ))}
           </div>
-          {selectedParticipants.length > 0 && (
-            <p className="mt-4 text-center text-gray-600">
-              {selectedParticipants.length}/3 participantes selecionados
-            </p>
-          )}
         </div>
       </main>
     </div>

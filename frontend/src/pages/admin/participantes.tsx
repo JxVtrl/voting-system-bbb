@@ -3,6 +3,7 @@ import Head from 'next/head';
 import AdminLayout from '../../components/AdminLayout';
 import Image from 'next/image';
 import ParticipantModal from '../../components/ParticipantModal';
+import Link from 'next/link';
 
 interface Participant {
   id: string;
@@ -16,6 +17,8 @@ export default function ParticipantsPage() {
   const [participants, setParticipants] = useState<Participant[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [editingParticipant, setEditingParticipant] = useState<Participant | null>(null);
+  const [newParticipant, setNewParticipant] = useState({ name: '', imageUrl: '' });
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     fetchParticipants();
@@ -121,6 +124,27 @@ export default function ParticipantsPage() {
     }
   };
 
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      const response = await fetch('http://localhost:8080/participantes', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(newParticipant),
+      });
+
+      if (response.ok) {
+        fetchParticipants();
+        setNewParticipant({ name: '', imageUrl: '' });
+      }
+    } catch (error) {
+      console.error('Erro ao adicionar novo participante:', error);
+      setError('Erro ao adicionar novo participante. Por favor, tente novamente mais tarde.');
+    }
+  };
+
   return (
     <AdminLayout>
       <Head>
@@ -129,83 +153,99 @@ export default function ParticipantsPage() {
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
-      <div className="bg-white rounded-lg shadow-lg p-6">
-        <div className="flex justify-between items-center mb-6">
-          <h2 className="text-2xl font-bold text-gray-800">Gerenciar Participantes</h2>
-          <button
-            onClick={() => setEditingParticipant({
-              id: '',
-              name: '',
-              imageUrl: '',
-              isActive: true,
-            })}
-            className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
-          >
-            Adicionar Participante
-          </button>
+      <main className="container mx-auto px-4 py-8">
+        <div className="flex justify-between items-center mb-8">
+          <h1 className="text-3xl font-bold text-gray-900">Gerenciar Participantes</h1>
+          <Link href="/admin" className="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600">
+            Voltar
+          </Link>
         </div>
 
-        {isLoading ? (
-          <div className="flex justify-center items-center h-64">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
+        {error && (
+          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+            <p>{error}</p>
           </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {participants.map(participant => (
+        )}
+
+        {/* Formulário de Novo Participante */}
+        <div className="bg-white rounded-lg shadow-md p-6 mb-8">
+          <h2 className="text-2xl font-bold text-gray-900 mb-4">Adicionar Novo Participante</h2>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div>
+              <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
+                Nome
+              </label>
+              <input
+                type="text"
+                id="name"
+                value={newParticipant.name}
+                onChange={(e) => setNewParticipant({ ...newParticipant, name: e.target.value })}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                required
+              />
+            </div>
+            <div>
+              <label htmlFor="imageUrl" className="block text-sm font-medium text-gray-700 mb-1">
+                URL da Imagem
+              </label>
+              <input
+                type="url"
+                id="imageUrl"
+                value={newParticipant.imageUrl}
+                onChange={(e) => setNewParticipant({ ...newParticipant, imageUrl: e.target.value })}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                required
+              />
+            </div>
+            <button
+              type="submit"
+              className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition-colors font-medium"
+            >
+              Adicionar Participante
+            </button>
+          </form>
+        </div>
+
+        {/* Lista de Participantes */}
+        <div className="bg-white rounded-lg shadow-md p-6">
+          <h2 className="text-2xl font-bold text-gray-900 mb-4">Participantes Cadastrados</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {participants.map((participant) => (
               <div
                 key={participant.id}
-                className="border rounded-lg p-4 hover:shadow-md transition-shadow"
+                className="bg-gray-50 rounded-lg p-4"
               >
-                <div className="relative h-48 mb-4">
-                  <Image
-                    src={participant.imageUrl}
-                    alt={participant.name}
-                    fill
-                    className="object-cover rounded-lg"
-                  />
-                  {participant.status && (
-                    <div className="absolute top-2 right-2 bg-yellow-500 text-white px-2 py-1 rounded-full text-sm font-semibold">
-                      {participant.status}
-                    </div>
-                  )}
-                </div>
-
-                <div className="space-y-4">
-                  <div>
-                    <h3 className="text-lg font-semibold text-gray-800">{participant.name}</h3>
-                    <p className="text-sm text-gray-600">ID: {participant.id}</p>
+                <div className="flex items-center space-x-4">
+                  <div className="relative w-16 h-16">
+                    <Image
+                      src={participant.imageUrl}
+                      alt={participant.name}
+                      fill
+                      className="rounded-full object-cover"
+                    />
                   </div>
-
-                  <div className="flex justify-between items-center">
-                    <select
-                      value={participant.status || ''}
-                      onChange={(e) => handleStatusChange(participant.id, e.target.value)}
-                      className="px-3 py-1 border rounded-md text-sm"
-                    >
-                      <option value="">Sem status</option>
-                      <option value="líder">Líder</option>
-                      <option value="indicado">Indicado</option>
-                      <option value="eliminado">Eliminado</option>
-                    </select>
-
-                    <button
-                      onClick={() => handleActiveChange(participant.id, !participant.isActive)}
-                      className={`px-3 py-1 rounded-full text-sm font-semibold ${
+                  <div className="flex-1">
+                    <h3 className="font-semibold text-gray-900">{participant.name}</h3>
+                    <div className="flex items-center space-x-2 mt-1">
+                      <span className={`px-2 py-1 text-xs rounded-full ${
                         participant.isActive
                           ? 'bg-green-100 text-green-800'
                           : 'bg-red-100 text-red-800'
+                      }`}>
+                        {participant.isActive ? 'Ativo' : 'Inativo'}
+                      </span>
+                    </div>
+                  </div>
+                  <div className="flex space-x-2">
+                    <button
+                      onClick={() => handleActiveChange(participant.id, !participant.isActive)}
+                      className={`px-3 py-1 rounded text-sm font-medium ${
+                        participant.isActive
+                          ? 'bg-red-100 text-red-800 hover:bg-red-200'
+                          : 'bg-green-100 text-green-800 hover:bg-green-200'
                       }`}
                     >
-                      {participant.isActive ? 'Ativo' : 'Inativo'}
-                    </button>
-                  </div>
-
-                  <div className="flex justify-end space-x-2">
-                    <button
-                      onClick={() => setEditingParticipant(participant)}
-                      className="px-3 py-1 text-sm text-blue-600 hover:text-blue-800"
-                    >
-                      Editar
+                      {participant.isActive ? 'Desativar' : 'Ativar'}
                     </button>
                     <button
                       onClick={() => {
@@ -213,7 +253,7 @@ export default function ParticipantsPage() {
                           handleDeleteParticipant(participant.id);
                         }
                       }}
-                      className="px-3 py-1 text-sm text-red-600 hover:text-red-800"
+                      className="px-3 py-1 rounded text-sm font-medium bg-red-100 text-red-800 hover:bg-red-200"
                     >
                       Excluir
                     </button>
@@ -222,8 +262,8 @@ export default function ParticipantsPage() {
               </div>
             ))}
           </div>
-        )}
-      </div>
+        </div>
+      </main>
 
       {editingParticipant !== null && (
         <ParticipantModal

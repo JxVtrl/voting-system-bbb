@@ -74,7 +74,6 @@ export default function Home() {
       
       if (!response.ok) throw new Error('Erro ao registrar voto');
       
-      // Atualizar o status após votar
       fetchVotingStatus();
     } catch (err) {
       console.error('Erro ao votar:', err);
@@ -109,14 +108,14 @@ export default function Home() {
       </Head>
 
       <main className="container mx-auto px-4 py-8">
-        <h1 className="text-3xl font-bold text-center mb-8">BBB 25 - Participantes</h1>
+        <h1 className="text-3xl font-bold text-gray-900 text-center mb-8">BBB 25 - Participantes</h1>
         
         {/* Lista de Participantes */}
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 mb-8">
           {participants.map((participant) => (
             <div
               key={participant.id}
-              className={`bg-white rounded-lg shadow-md p-4 text-center ${
+              className={`relative bg-white rounded-lg shadow-md p-4 text-center ${
                 !participant.isActive ? 'opacity-50' : ''
               }`}
             >
@@ -128,14 +127,14 @@ export default function Home() {
                   className="rounded-full object-cover"
                 />
                 {participant.status && (
-                  <div className="absolute -top-2 -right-2 bg-blue-500 text-white text-xs px-2 py-1 rounded-full">
+                  <div className="absolute -top-2 -right-2 bg-blue-600 text-white text-xs px-2 py-1 rounded-full font-medium">
                     {participant.status}
                   </div>
                 )}
               </div>
-              <h2 className="font-semibold">{participant.name}</h2>
+              <h2 className="font-semibold text-gray-900">{participant.name}</h2>
               {participant.votes !== undefined && (
-                <p className="text-sm text-gray-600">Votos: {participant.votes}</p>
+                <p className="text-sm font-medium text-gray-700">Votos: {participant.votes.toLocaleString()}</p>
               )}
             </div>
           ))}
@@ -144,7 +143,7 @@ export default function Home() {
         {/* Paredão Atual */}
         {votingStatus.isEnabled && votingStatus.participants.length > 0 && (
           <div className="bg-white rounded-lg shadow-md p-6 mb-8">
-            <h2 className="text-2xl font-bold text-center mb-4">Paredão Atual</h2>
+            <h2 className="text-2xl font-bold text-gray-900 text-center mb-4">Paredão Atual</h2>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               {votingStatus.participants.map((participant) => (
                 <div key={participant.id} className="text-center">
@@ -156,19 +155,21 @@ export default function Home() {
                       className="rounded-full object-cover"
                     />
                   </div>
-                  <h3 className="font-semibold">{participant.name}</h3>
-                  <p className="text-sm text-gray-600 mb-2">Votos: {participant.votes || 0}</p>
+                  <h3 className="font-semibold text-gray-900">{participant.name}</h3>
+                  <p className="text-sm font-medium text-gray-700 mb-2">Votos: {participant.votes?.toLocaleString() || '0'}</p>
                   <button
                     onClick={() => handleVote(participant.id)}
-                    className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition-colors"
+                    className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition-colors font-medium"
                   >
                     Votar
                   </button>
                 </div>
               ))}
             </div>
-            <div className="text-center mt-4 text-gray-600">
-              Total de votos: {votingStatus.totalVotes}
+            <div className="text-center mt-4">
+              <p className="text-lg font-semibold text-gray-900">
+                Total de votos: {votingStatus.totalVotes.toLocaleString()}
+              </p>
             </div>
           </div>
         )}

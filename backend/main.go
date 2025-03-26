@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
+	"strings"
 	"time"
 )
 
@@ -267,10 +268,80 @@ func vote(w http.ResponseWriter, r *http.Request) {
 	log.Printf("Total de votos no paredão: %d", votingStatus.TotalVotes)
 }
 
+func updateParticipantStatus(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPut {
+		http.Error(w, "Método não permitido", http.StatusMethodNotAllowed)
+		return
+	}
+
+	participantID := r.URL.Path[len("/participantes/"):]
+	participantID = participantID[:len(participantID)-len("/status")]
+
+	var request struct {
+		Status string `json:"status"`
+	}
+	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
+		http.Error(w, "Erro ao decodificar requisição", http.StatusBadRequest)
+		return
+	}
+
+	for i := range participants {
+		if participants[i].ID == participantID {
+			participants[i].Status = request.Status
+			w.WriteHeader(http.StatusOK)
+			return
+		}
+	}
+
+	http.Error(w, "Participante não encontrado", http.StatusNotFound)
+}
+
+func updateParticipantActive(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPut {
+		http.Error(w, "Método não permitido", http.StatusMethodNotAllowed)
+		return
+	}
+
+	participantID := r.URL.Path[len("/participantes/"):]
+	participantID = participantID[:len(participantID)-len("/ativo")]
+
+	var request struct {
+		IsActive bool `json:"isActive"`
+	}
+	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
+		http.Error(w, "Erro ao decodificar requisição", http.StatusBadRequest)
+		return
+	}
+
+	for i := range participants {
+		if participants[i].ID == participantID {
+			participants[i].IsActive = request.IsActive
+			w.WriteHeader(http.StatusOK)
+			return
+		}
+	}
+
+	http.Error(w, "Participante não encontrado", http.StatusNotFound)
+}
+
 func main() {
 	log.Println("Iniciando servidor na porta 8080")
 	
 	http.HandleFunc("/participantes", corsMiddleware(getParticipants))
+	http.HandleFunc("/participantes/", func(w http.ResponseWriter, r *http.Request) {
+		if r.Method == http.MethodOptions {
+			handleOptions(w, r)
+			return
+		}
+		
+		if strings.HasSuffix(r.URL.Path, "/status") {
+			corsMiddleware(updateParticipantStatus)(w, r)
+		} else if strings.HasSuffix(r.URL.Path, "/ativo") {
+			corsMiddleware(updateParticipantActive)(w, r)
+		} else {
+			http.Error(w, "Rota não encontrada", http.StatusNotFound)
+		}
+	})
 	http.HandleFunc("/status", corsMiddleware(getVotingStatus))
 	http.HandleFunc("/iniciar-votacao", func(w http.ResponseWriter, r *http.Request) {
 		if r.Method == http.MethodOptions {
