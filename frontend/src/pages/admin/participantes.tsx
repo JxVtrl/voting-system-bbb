@@ -15,15 +15,12 @@ export default function GerenciarParticipantes() {
   const [isLoading, setIsLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
-  const [currentPage, setCurrentPage] = useState(1);
   const [sortBy, setSortBy] = useState<'name' | 'status' | 'votes'>('name');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
   const [statusFilter, setStatusFilter] = useState<'todos' | 'ativo' | 'inativo' | 'lider' | 'eliminado'>('todos');
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);
   const [menuPosition, setMenuPosition] = useState({ top: 0, left: 0 });
   const actionButtonRefs = useRef<{ [key: string]: HTMLButtonElement | null }>({});
-
-  const ITEMS_PER_PAGE = 8;
 
   const loadParticipants = async () => {
     try {
@@ -75,12 +72,6 @@ export default function GerenciarParticipantes() {
 
     setFilteredParticipants(sorted);
   }, [participants, searchTerm, sortBy, sortOrder, statusFilter]);
-
-  const totalPages = Math.ceil(filteredParticipants.length / ITEMS_PER_PAGE);
-  const paginatedParticipants = filteredParticipants.slice(
-    (currentPage - 1) * ITEMS_PER_PAGE,
-    currentPage * ITEMS_PER_PAGE
-  );
 
   const handleSort = (field: 'name' | 'status' | 'votes') => {
     if (sortBy === field) {
@@ -211,8 +202,6 @@ export default function GerenciarParticipantes() {
                   <option value="lider">Líder</option>
                   <option value="eliminado">Eliminados</option>
                 </select>
-
-
               </div>
 
               <button
@@ -231,8 +220,7 @@ export default function GerenciarParticipantes() {
             </div>
           ) : (
             <>
-              <div className='flex justify-between items-center'>
-
+              <div className='flex justify-between items-center p-4'>
                 <div className={styles.adminPageSortButtons}>
                   <button onClick={() => handleSort('name')}>
                     Nome {sortBy === 'name' && (sortOrder === 'asc' ? '↑' : '↓')}
@@ -241,44 +229,24 @@ export default function GerenciarParticipantes() {
                     Votos {sortBy === 'votes' && (sortOrder === 'asc' ? '↑' : '↓')}
                   </button>
                 </div>
-                <div className={styles.adminPagePagination}>
-                  <button
-                    onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
-                    disabled={currentPage === 1}
-                    className={styles.adminPageButton}
-                  >
-                    Anterior
-                  </button>
-                  <span>
-                    Página {currentPage} de {totalPages}
-                  </span>
-                  <button
-                    onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
-                    disabled={currentPage === totalPages}
-                    className={styles.adminPageButton}
-                  >
-                    Próxima
-                  </button>
-                </div>
               </div>
 
               <div className={styles.adminPageCardGrid}>
-                {paginatedParticipants.map((participant) => (
+                {filteredParticipants.map((participant) => (
                   <div key={participant.id} className={styles.adminPageParticipantCard}>
                     <div className={styles.adminPageParticipantCardImage}>
                       <Image
                         src={participant.imageUrl}
                         alt={participant.name}
-                        width={48}
-                        height={48}
+                        width={40}
+                        height={40}
                         className="object-cover"
                       />
                     </div>
                     <div className={styles.adminPageParticipantCardInfo}>
                       <h3>{participant.name}</h3>
                       <div className={styles.statusContainer}>
-                        <span className={`${styles.adminPageStatus} ${participant.isActive ? styles.adminPageStatusSuccess : styles.adminPageStatusDanger
-                          }`}>
+                        <span className={`${styles.adminPageStatus} ${participant.isActive ? styles.adminPageStatusSuccess : styles.adminPageStatusDanger}`}>
                           {participant.isActive ? 'Ativo' : 'Inativo'}
                         </span>
                         {participant.status === 'líder' && (
@@ -334,7 +302,7 @@ export default function GerenciarParticipantes() {
                               handleToggleActive(participant);
                               setOpenMenuId(null);
                             }}
-                            className={participant.isActive ? 'warning' : ''}
+                            className={participant.isActive ? styles.adminPageActionMenuWarning : ''}
                           >
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                               {participant.isActive ? (
@@ -351,7 +319,7 @@ export default function GerenciarParticipantes() {
                               handleDelete(participant.id);
                               setOpenMenuId(null);
                             }}
-                            className="danger"
+                            className={styles.adminPageActionMenuDanger}
                           >
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                               <polyline points="3 6 5 6 21 6" />
