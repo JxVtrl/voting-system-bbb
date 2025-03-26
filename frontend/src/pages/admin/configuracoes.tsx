@@ -28,11 +28,11 @@ export default function Configuracoes() {
           {isLoading ? (
             <div className={styles.adminPageLoading}>
               <div className={styles.adminPageLoadingSpinner} />
-              <p>Carregando configurações...</p>
+              <p className={styles.adminPageLoadingText}>Carregando configurações...</p>
             </div>
           ) : (
             <div className={styles.adminPageCardContent}>
-              <p className="text-gray-500 text-center py-4">
+              <p className={styles.adminPageEmptyMessage}>
                 Em desenvolvimento...
               </p>
             </div>

@@ -48,11 +48,11 @@ export default function Votacoes() {
           {isLoading ? (
             <div className={styles.adminPageLoading}>
               <div className={styles.adminPageLoadingSpinner} />
-              <p>Carregando histórico...</p>
+              <p className={styles.adminPageLoadingText}>Carregando histórico...</p>
             </div>
           ) : votingHistory.length === 0 ? (
             <div className={styles.adminPageCardContent}>
-              <p className="text-gray-500 text-center py-4">
+              <p className={styles.adminPageEmptyMessage}>
                 Nenhuma votação realizada ainda.
               </p>
             </div>
@@ -75,16 +75,15 @@ export default function Votacoes() {
                     {voting.participants.map((participant) => (
                       <div
                         key={participant.id}
-                        className={`${styles.adminPageVotingCardParticipant} ${
-                          voting.winner?.id === participant.id ? styles.adminPageVotingCardWinner : ''
-                        }`}
+                        className={`${styles.adminPageVotingCardParticipant} ${voting.winner?.id === participant.id ? styles.adminPageVotingCardWinner : ''
+                          }`}
                       >
                         <div className={styles.adminPageVotingCardParticipantImage}>
                           <Image
                             src={participant.imageUrl}
                             alt={participant.name}
                             fill
-                            className="object-cover"
+                            className={styles.adminPageParticipantCardImageContent}
                           />
                         </div>
                         <div className={styles.adminPageVotingCardParticipantInfo}>

@@ -109,18 +109,11 @@ export default function Admin() {
             )}
             <div className={styles.adminPageButtonGroup}>
               <button
-                onClick={() => setIsSelectionModalOpen(true)}
-                disabled={votingStatus.isEnabled}
-                className={`${styles.adminPageButton} ${styles.adminPageButtonPrimary}`}
+                onClick={votingStatus.isEnabled ? handleEndVoting : () => setIsSelectionModalOpen(true)}
+                className={`${styles.adminPageButton} ${votingStatus.isEnabled ? styles.adminPageButtonDanger : styles.adminPageButtonPrimary
+                  }`}
               >
-                Iniciar Paredão
-              </button>
-              <button
-                onClick={handleEndVoting}
-                disabled={!votingStatus.isEnabled}
-                className={`${styles.adminPageButton} ${styles.adminPageButtonDanger}`}
-              >
-                Encerrar Votação
+                {votingStatus.isEnabled ? 'Encerrar Votação' : 'Iniciar Paredão'}
               </button>
             </div>
           </div>
