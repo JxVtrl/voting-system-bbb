@@ -47,7 +47,7 @@ export function AdminMenu({ participants, isVotingEnabled }: AdminMenuProps) {
         description: (
           <div>
             {(history as VotingHistory[]).map((vote: VotingHistory, index: number) => (
-              <div key={vote.id}>
+              <div key={vote.id} className="mb-4">
                 <strong>Paredão {index + 1}:</strong>
                 <br />
                 Participantes: {vote.participants.map((p: Participant) => p.name).join(', ')}
@@ -138,26 +138,12 @@ export function AdminMenu({ participants, isVotingEnabled }: AdminMenuProps) {
       ),
       duration: Infinity,
       className: styles.adminMenuToast,
-      style: {
-        background: 'white',
-        color: '#1a365d',
-        padding: '16px',
-        borderRadius: '8px',
-        boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
-        border: '1px solid #e2e8f0',
-        width: 'auto',
-        minWidth: '300px',
-        transform: 'none !important',
-        transition: 'none !important',
-        height: 'auto !important',
-        maxHeight: 'none !important',
-      },
     });
   };
 
   return (
     <>
-      <button className={styles.adminMenuButton} onClick={showAdminMenu}>
+      <button className={`${styles.adminMenuButton} ${styles.mainButton}`} onClick={showAdminMenu}>
         Menu Administrativo
       </button>
 

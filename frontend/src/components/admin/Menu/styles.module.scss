@@ -1,8 +1,5 @@
-.admin-menu {
-  &__button {
-    position: fixed;
-    top: 20px;
-    right: 20px;
+.adminMenu {
+  &Button {
     background: #1a365d;
     color: white;
     border: none;
@@ -11,79 +8,83 @@
     cursor: pointer;
     font-size: 14px;
     transition: all 0.2s ease;
-    z-index: 100;
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    width: 100%;
+
+    // Estilo apenas para o botão principal (fora do menu)
+    &.mainButton {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      width: auto;
+      z-index: 100;
+    }
 
     &:hover {
       background: #2c5282;
       transform: translateY(-1px);
     }
+
+    &Danger {
+      background: #dc3545;
+
+      &:hover {
+        background: #c82333;
+      }
+    }
+
+    &Secondary {
+      background: #718096;
+
+      &:hover {
+        background: #4a5568;
+      }
+    }
   }
 
-  &__content {
+  &Content {
     display: flex;
     flex-direction: column;
-    gap: 8px;
-    padding: 4px;
+    gap: 12px;
+    padding: 16px;
     width: 100%;
     min-width: 300px;
   }
 
-  &__header {
+  &Header {
     display: flex;
     align-items: center;
     gap: 8px;
-    margin-bottom: 8px;
+    margin-bottom: 16px;
     padding-bottom: 8px;
     border-bottom: 1px solid #e2e8f0;
   }
 
-  &__title {
+  &Title {
     color: #1a365d;
     font-size: 1.1rem;
     font-weight: 600;
     margin: 0;
   }
 
-  &__menu-button {
-    background: #3182ce;
-    color: white;
-    border: none;
-    border-radius: 6px;
-    padding: 10px 16px;
-    cursor: pointer;
-    font-size: 0.95rem;
-    width: 100%;
-    text-align: left;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    transition: all 0.2s ease;
-
-    &:hover {
-      transform: translateY(-1px);
-      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    }
-
-    &:disabled {
-      background: #cbd5e0;
-      cursor: not-allowed;
-      transform: none;
-      box-shadow: none;
-    }
-
-    &--danger {
-      background: #dc3545;
-    }
-
-    &--secondary {
-      background: #718096;
-    }
-  }
-
-  &__divider {
+  &Divider {
     height: 1px;
     background: #e2e8f0;
-    margin: 4px 0;
+    margin: 8px 0;
+  }
+
+  &Toast {
+    background: white !important;
+    color: #1a365d !important;
+    padding: 16px !important;
+    border-radius: 8px !important;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1) !important;
+    border: 1px solid #e2e8f0 !important;
+    width: auto !important;
+    min-width: 300px !important;
+    transform: none !important;
+    transition: none !important;
+    height: auto !important;
+    max-height: none !important;
   }
 } 
