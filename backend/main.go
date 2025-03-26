@@ -185,7 +185,26 @@ func endVoting(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	log.Printf("Vencedor do paredão: %s com %d votos", winner.Name, winner.Votes)
+	// Se não houver vencedor (empate ou sem votos), não atualiza o status dos participantes
+	if winner != nil {
+		log.Printf("Vencedor do paredão: %s com %d votos", winner.Name, winner.Votes)
+
+		// Atualizar status dos participantes
+		for i := range participants {
+			for _, p := range votingStatus.Participants {
+				if participants[i].ID == p.ID {
+					if p.ID != winner.ID {
+						participants[i].Status = "eliminado"
+						participants[i].IsActive = false
+						log.Printf("Participante eliminado: %s", participants[i].Name)
+					}
+					break
+				}
+			}
+		}
+	} else {
+		log.Println("Nenhum voto registrado no paredão")
+	}
 
 	// Criar histórico
 	history := VotingHistory{
@@ -198,20 +217,6 @@ func endVoting(w http.ResponseWriter, r *http.Request) {
 	}
 	votingHistory = append(votingHistory, history)
 	log.Printf("Histórico atualizado. Total de paredões: %d", len(votingHistory))
-
-	// Atualizar status dos participantes
-	for i := range participants {
-		for _, p := range votingStatus.Participants {
-			if participants[i].ID == p.ID {
-				if p.ID != winner.ID {
-					participants[i].Status = "eliminado"
-					participants[i].IsActive = false
-					log.Printf("Participante eliminado: %s", participants[i].Name)
-				}
-				break
-			}
-		}
-	}
 
 	// Resetar status da votação
 	votingStatus = VotingStatus{
@@ -343,28 +348,10 @@ func main() {
 		}
 	})
 	http.HandleFunc("/status", corsMiddleware(getVotingStatus))
-	http.HandleFunc("/iniciar-votacao", func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == http.MethodOptions {
-			handleOptions(w, r)
-			return
-		}
-		corsMiddleware(startVoting)(w, r)
-	})
-	http.HandleFunc("/encerrar-votacao", func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == http.MethodOptions {
-			handleOptions(w, r)
-			return
-		}
-		corsMiddleware(endVoting)(w, r)
-	})
+	http.HandleFunc("/iniciar-votacao", corsMiddleware(startVoting))
+	http.HandleFunc("/encerrar-votacao", corsMiddleware(endVoting))
 	http.HandleFunc("/historico", corsMiddleware(getVotingHistory))
-	http.HandleFunc("/votar", func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == http.MethodOptions {
-			handleOptions(w, r)
-			return
-		}
-		corsMiddleware(vote)(w, r)
-	})
+	http.HandleFunc("/votar", corsMiddleware(vote))
 
 	log.Println("Rotas configuradas com sucesso")
 	log.Fatal(http.ListenAndServe(":8080", nil))
