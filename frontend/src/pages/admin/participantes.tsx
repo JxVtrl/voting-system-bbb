@@ -1,19 +1,77 @@
 import { useState, useEffect } from 'react';
+import styled from 'styled-components';
+import { Participant } from '@/types';
+import { api } from '@/services/api';
+import { toast } from 'sonner';
 import Head from 'next/head';
 import AdminLayout from '../../components/AdminLayout';
 import Image from 'next/image';
 import ParticipantModal from '../../components/ParticipantModal';
 import Link from 'next/link';
 
-interface Participant {
-  id: string;
-  name: string;
-  imageUrl: string;
-  status?: string;
-  isActive: boolean;
-}
+const PageContainer = styled.div`
+  padding: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+`;
 
-export default function ParticipantsPage() {
+const Title = styled.h1`
+  color: #333;
+  margin-bottom: 20px;
+`;
+
+const ParticipantGrid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 20px;
+  margin-top: 20px;
+`;
+
+const ParticipantCard = styled.div`
+  background: white;
+  border-radius: 8px;
+  padding: 15px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+`;
+
+const ParticipantImage = styled.img`
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+  border-radius: 4px;
+  margin-bottom: 10px;
+`;
+
+const ParticipantInfo = styled.div`
+  margin-top: 10px;
+`;
+
+const Button = styled.button<{ $variant?: 'danger' | 'primary' }>`
+  background: ${props => props.$variant === 'danger' ? '#dc3545' : '#0070f3'};
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 8px 12px;
+  cursor: pointer;
+  margin-top: 10px;
+  width: 100%;
+
+  &:hover {
+    opacity: 0.9;
+  }
+`;
+
+const AddButton = styled(Button)`
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  width: auto;
+  padding: 12px 24px;
+  font-size: 16px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+`;
+
+export default function GerenciarParticipantes() {
   const [participants, setParticipants] = useState<Participant[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [editingParticipant, setEditingParticipant] = useState<Participant | null>(null);
@@ -21,21 +79,40 @@ export default function ParticipantsPage() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    fetchParticipants();
+    loadParticipants();
   }, []);
 
-  const fetchParticipants = async () => {
+  const loadParticipants = async () => {
     try {
-      const response = await fetch('http://localhost:8080/participantes');
-      if (response.ok) {
-        const data = await response.json();
-        setParticipants(data);
-      }
+      const data = await api.getParticipants();
+      setParticipants(data);
     } catch (error) {
-      console.error('Erro ao buscar participantes:', error);
+      toast.error('Erro ao carregar participantes');
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleEdit = (participant: Participant) => {
+    // Implementar lógica de edição
+    toast.info('Funcionalidade em desenvolvimento');
+  };
+
+  const handleDelete = async (participantId: string) => {
+    if (!confirm('Tem certeza que deseja excluir este participante?')) return;
+
+    try {
+      await api.deleteParticipant(participantId);
+      toast.success('Participante excluído com sucesso');
+      loadParticipants();
+    } catch (error) {
+      toast.error('Erro ao excluir participante');
+    }
+  };
+
+  const handleAddNew = () => {
+    // Implementar lógica de adição
+    toast.info('Funcionalidade em desenvolvimento');
   };
 
   const handleStatusChange = async (participantId: string, newStatus: string) => {
@@ -49,7 +126,7 @@ export default function ParticipantsPage() {
       });
 
       if (response.ok) {
-        fetchParticipants();
+        loadParticipants();
       }
     } catch (error) {
       console.error('Erro ao atualizar status:', error);
@@ -67,7 +144,7 @@ export default function ParticipantsPage() {
       });
 
       if (response.ok) {
-        fetchParticipants();
+        loadParticipants();
       }
     } catch (error) {
       console.error('Erro ao atualizar status de ativo:', error);
@@ -85,7 +162,7 @@ export default function ParticipantsPage() {
       });
 
       if (response.ok) {
-        fetchParticipants();
+        loadParticipants();
       }
     } catch (error) {
       console.error('Erro ao salvar participante:', error);
@@ -103,24 +180,10 @@ export default function ParticipantsPage() {
       });
 
       if (response.ok) {
-        fetchParticipants();
+        loadParticipants();
       }
     } catch (error) {
       console.error('Erro ao atualizar participante:', error);
-    }
-  };
-
-  const handleDeleteParticipant = async (participantId: string) => {
-    try {
-      const response = await fetch(`http://localhost:8080/participantes/${participantId}`, {
-        method: 'DELETE',
-      });
-
-      if (response.ok) {
-        fetchParticipants();
-      }
-    } catch (error) {
-      console.error('Erro ao excluir participante:', error);
     }
   };
 
@@ -136,7 +199,7 @@ export default function ParticipantsPage() {
       });
 
       if (response.ok) {
-        fetchParticipants();
+        loadParticipants();
         setNewParticipant({ name: '', imageUrl: '' });
       }
     } catch (error) {
@@ -248,11 +311,7 @@ export default function ParticipantsPage() {
                       {participant.isActive ? 'Desativar' : 'Ativar'}
                     </button>
                     <button
-                      onClick={() => {
-                        if (confirm('Tem certeza que deseja excluir este participante?')) {
-                          handleDeleteParticipant(participant.id);
-                        }
-                      }}
+                      onClick={() => handleDelete(participant.id)}
                       className="px-3 py-1 rounded text-sm font-medium bg-red-100 text-red-800 hover:bg-red-200"
                     >
                       Excluir
@@ -263,6 +322,10 @@ export default function ParticipantsPage() {
             ))}
           </div>
         </div>
+
+        <AddButton onClick={handleAddNew}>
+          + Adicionar Participante
+        </AddButton>
       </main>
 
       {editingParticipant !== null && (

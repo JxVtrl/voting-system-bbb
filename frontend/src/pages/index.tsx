@@ -5,6 +5,8 @@ import { api } from '../services/api';
 import Head from 'next/head';
 import { VotingPanel } from '@/components/VotingPanel';
 import { ParticipantsScroll } from '@/components/ParticipantsScroll';
+import { AdminMenu } from '@/components/AdminMenu';
+import { Toaster } from '@/components/ui/sonner';
 
 const PageContainer = styled.div`
   min-height: 100vh;
@@ -104,6 +106,18 @@ export default function Home() {
     }
 
     loadData();
+
+    // Atualiza o status da votação a cada 5 segundos
+    const interval = setInterval(async () => {
+      try {
+        const statusData = await api.getVotingStatus();
+        setVotingStatus(statusData);
+      } catch (err) {
+        console.error('Erro ao atualizar status:', err);
+      }
+    }, 5000);
+
+    return () => clearInterval(interval);
   }, []);
 
   const handleVote = async (participantId: string) => {
@@ -146,7 +160,14 @@ export default function Home() {
             isVotingEnabled={votingStatus.isEnabled}
           />
         </ContentContainer>
+
+        <AdminMenu 
+          participants={participants}
+          isVotingEnabled={votingStatus.isEnabled}
+        />
       </PageContainer>
+
+      <Toaster />
     </>
   );
 }
