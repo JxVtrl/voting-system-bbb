@@ -93,27 +93,25 @@ export default function Admin() {
         {/* Status da Votação */}
         <div className={styles.adminPageCard}>
           <div className={styles.adminPageCardHeader}>
-            <div>
-              <h2>Status da Votação</h2>
-              <div className="mt-2 flex items-center space-x-2">
-                <span className={`${styles.adminPageStatus} ${
-                  votingStatus.isEnabled ? styles.adminPageStatusSuccess : styles.adminPageStatusDanger
-                }`}>
-                  {votingStatus.isEnabled ? 'Votação Ativa' : 'Votação Inativa'}
-                </span>
-              </div>
-              {votingStatus.isEnabled && votingStatus.startTime && votingStatus.endTime && (
-                <div className="mt-4 space-y-1">
-                  <p className="text-sm text-gray-600">
-                    Início: {new Date(votingStatus.startTime).toLocaleString()}
-                  </p>
-                  <p className="text-sm text-gray-600">
-                    Fim: {new Date(votingStatus.endTime).toLocaleString()}
-                  </p>
-                </div>
-              )}
+            <h2>Status da Votação</h2>
+            <div className="mt-2 flex items-center space-x-2">
+              <span className={`${styles.adminPageStatus} ${
+                votingStatus.isEnabled ? styles.adminPageStatusSuccess : styles.adminPageStatusDanger
+              }`}>
+                {votingStatus.isEnabled ? 'Votação Ativa' : 'Votação Inativa'}
+              </span>
             </div>
-            <div className="flex space-x-3">
+            {votingStatus.isEnabled && votingStatus.startTime && votingStatus.endTime && (
+              <div className="mt-4 space-y-1">
+                <p className="text-sm text-gray-600">
+                  Início: {new Date(votingStatus.startTime).toLocaleString()}
+                </p>
+                <p className="text-sm text-gray-600">
+                  Fim: {new Date(votingStatus.endTime).toLocaleString()}
+                </p>
+              </div>
+            )}
+            <div className="flex space-x-3 mt-4">
               <button
                 onClick={() => setIsSelectionModalOpen(true)}
                 disabled={votingStatus.isEnabled}
@@ -157,7 +155,7 @@ export default function Admin() {
                   </div>
                   <div className={styles.adminPageParticipantCardInfo}>
                     <h3>{participant.name}</h3>
-                    <p className="text-sm text-gray-600">
+                    <p>
                       Votos: {participant.votes?.toLocaleString() || '0'}
                     </p>
                   </div>
